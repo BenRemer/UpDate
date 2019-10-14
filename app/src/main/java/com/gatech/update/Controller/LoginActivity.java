@@ -7,6 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -48,8 +49,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
 
         Button button = findViewById(R.id.button);
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+
         // Button listerners
         button.setOnClickListener(this);
+        signInButton.setOnClickListener(this);
+
         String path = "app/src/main/java/com/gatech/update/Model/token.txt";
         String token = getToken(path);
 
@@ -164,8 +170,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         int i = v.getId();
         if (i == R.id.button) {
             googleSignIn();
-//        } else if (i == R.id.signOutButton) {
-//            signOut();
+        } else if (i == R.id.sign_in_button) {
+            googleSignIn();
 //        } else if (i == R.id.disconnectButton) {
 //            revokeAccess();
         }
