@@ -154,8 +154,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onStart() {
         super.onStart();
 //        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null){
             Intent intent = new Intent(this, DrawerActivity.class);
             startActivity(intent);
             Toast.makeText(getApplicationContext(), "Already Logged In", Toast.LENGTH_SHORT).show();

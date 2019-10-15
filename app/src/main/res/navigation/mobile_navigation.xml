@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.gatech.update.ui.gallery.GalleryFragment"
+        android:id="@+id/nav_account"
+        android:name="com.gatech.update.ui.account.AccountFragment"
         android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_account" />
 
     <fragment
         android:id="@+id/nav_slideshow"
