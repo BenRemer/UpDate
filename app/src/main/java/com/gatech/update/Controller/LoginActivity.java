@@ -51,12 +51,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Button button = findViewById(R.id.button);
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
 
-        // Button listerners
-        button.setOnClickListener(this);
+        // Button listeners
         signInButton.setOnClickListener(this);
 
         // Configure Google Sign In
@@ -115,6 +113,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+                            startActivity(intent);
 //                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -154,29 +154,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onStart() {
         super.onStart();
 //        // Check if user is signed in (non-null) and update UI accordingly.
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        if (currentUser != null){
-//            Intent intent = new Intent(this, MainActivity.class);
-//            startActivity(intent);
-//            Toast.makeText(getApplicationContext(), "Already Logged In", Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Logged in");
-//        } else {
-//            Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Not logged in");
-//        }
-//        updateUI(currentUser)
-        GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (alreadyloggedAccount != null) {
-//            Intent intent = new Intent(this, MainActivity.class);
-//            startActivity(intent);
-//            finish();
-            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, MainActivity.class);
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null){
+            Intent intent = new Intent(this, DrawerActivity.class);
             startActivity(intent);
-//            onLoggedIn(alreadyloggedAccount);
+            Toast.makeText(getApplicationContext(), "Already Logged In", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Logged in");
         } else {
+            Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Not logged in");
         }
+//        updateUI(currentUser)
+//        GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
+//        if (alreadyloggedAccount != null) {
+////            Intent intent = new Intent(this, MainActivity.class);
+////            startActivity(intent);
+////            finish();
+//            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(this, DrawerActivity.class);
+//            startActivity(intent);
+////            onLoggedIn(alreadyloggedAccount);
+//        } else {
+//            Log.d(TAG, "Not logged in");
+//        }
 
     }
 
@@ -197,9 +197,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if (i == R.id.button) {
-            googleSignIn();
-        } else if (i == R.id.sign_in_button) {
+        if (i == R.id.sign_in_button) {
             googleSignIn();
 //        } else if (i == R.id.disconnectButton) {
 //            revokeAccess();

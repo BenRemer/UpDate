@@ -9,7 +9,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Controller.MainActivity"></activity>
+        <activity
+            android:name=".Controller.DrawerActivity"
+            android:label="@string/title_activity_drawer"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".Controller.MainActivity" />
         <activity
             android:name=".Controller.LoginActivity"
             android:label="@string/app_name">
