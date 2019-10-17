@@ -27,4 +27,5 @@
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="name">name</string>
     <string name="email">email</string>
+    <string name="enter_group_name">Enter Group Name</string>
 </resources>
