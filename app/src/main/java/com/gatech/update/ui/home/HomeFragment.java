@@ -31,5 +31,9 @@ public class HomeFragment extends Fragment {
             }
         });
         return root;
+
+        // Should pull information based on groups of user
+        // If user not in any groups, should be prompted a button to create a group
+
     }
 }

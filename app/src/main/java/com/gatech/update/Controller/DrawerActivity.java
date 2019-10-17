@@ -15,6 +15,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -24,6 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.TextView;
+
+import java.util.Objects;
 
 public class DrawerActivity extends AppCompatActivity {
 
@@ -31,6 +35,7 @@ public class DrawerActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
+    private FirebaseUser mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,9 @@ public class DrawerActivity extends AppCompatActivity {
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        // Grabs the header inside of nav view - edit header relative to user
+        View navHead = navigationView.getHeaderView(0);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -61,9 +69,16 @@ public class DrawerActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("where");
+        mUser = mAuth.getCurrentUser();
 
-        myRef.child(mAuth.getUid()).setValue("Test");
+        myRef = database.getReference("where");
+        myRef.child(Objects.requireNonNull(mAuth.getUid())).setValue("Test");
+
+        // Set name & email for user
+        final TextView name = navHead.findViewById(R.id.text_name_d);
+        final TextView email = navHead.findViewById(R.id.text_email_d);
+        name.setText(mUser.getDisplayName());
+        email.setText(mUser.getEmail());
     }
 
     @Override
