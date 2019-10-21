@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,10 +19,19 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.gatech.update.Controller.CreateGroupActivity;
 import com.gatech.update.R;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
+    private ListView myGroups;
+    private ArrayList<String> myList = new ArrayList<>();
+
+    private FirebaseUser mUser;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -34,6 +45,9 @@ public class HomeFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+        // Code to display group info to home screen (ListView)
+        myGroups = root.findViewById(R.id.groupInfo);
 
         // Should pull information based on groups of user
         // User should be able to start a new group from start
