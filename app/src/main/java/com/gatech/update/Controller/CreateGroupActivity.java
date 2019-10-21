@@ -45,11 +45,12 @@ public class CreateGroupActivity extends Activity {
         // Create a listener for input box
         groupName = findViewById(R.id.input_groupName);
 
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build();
-        firestore.setFirestoreSettings(settings);
+        // used in HomeFragment and apparently not needed in this subView (errors otherwise)
+//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+//        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+//                .setTimestampsInSnapshotsEnabled(true)
+//                .build();
+//        //firestore.setFirestoreSettings(settings);
     }
 
     // Sets guidelines for Group Names
@@ -90,6 +91,9 @@ public class CreateGroupActivity extends Activity {
         user.put("Display_Name", Objects.requireNonNull(mUser.getDisplayName()));
         user.put("Firebase_ID", userID);
         user.put("Permission", "Owner");
+
+        // TODO: If calculated group hash somehow exists, adding will overwrite a collection
+        //       may want to add a collision condition (like adding 1)
 
         // create document and put group in it
         db.collection("Groups")

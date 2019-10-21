@@ -30,14 +30,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ListView
+    <ScrollView
         android:id="@+id/groupInfo"
-        android:layout_width="387dp"
-        android:layout_height="558dp"
+        android:layout_width="362dp"
+        android:layout_height="534dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="40dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_home" />
+        app:layout_constraintTop_toBottomOf="@+id/text_home">
+
+        <LinearLayout
+            android:id="@+id/ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
