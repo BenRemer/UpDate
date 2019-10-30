@@ -18,10 +18,10 @@
         tools:layout="@layout/fragment_account" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.gatech.update.ui.slideshow.SlideshowFragment"
+        android:id="@+id/nav_map"
+        android:name="com.gatech.update.ui.map.MapFragment"
         android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/nav_logout"

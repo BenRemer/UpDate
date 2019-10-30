@@ -27,8 +27,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.TextView;
 
-import java.util.Objects;
-
 public class DrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -59,7 +57,7 @@ public class DrawerActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_account, R.id.nav_slideshow,
+                R.id.nav_home, R.id.nav_account, R.id.nav_map,
                 R.id.nav_logout, R.id.nav_share, R.id.nav_send)
                 .setDrawerLayout(drawer)
                 .build();
@@ -71,8 +69,8 @@ public class DrawerActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         mUser = mAuth.getCurrentUser();
 
-        myRef = database.getReference("where");
-        myRef.child(Objects.requireNonNull(mAuth.getUid())).setValue("Test");
+//        myRef = database.getReference("where");
+//        myRef.child(Objects.requireNonNull(mAuth.getUid())).setValue("Test");
 
         // Set name & email for user
         final TextView name = navHead.findViewById(R.id.text_name_d);
