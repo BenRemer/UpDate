@@ -15,7 +15,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,12 +30,11 @@ public class CreateGroupActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_create);
+
         // Set display metrics to determine area of window
         DisplayMetrics dispM = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dispM);
-
         int width = dispM.widthPixels;
 
         // set desired width, height -> can use percentage
@@ -44,13 +42,6 @@ public class CreateGroupActivity extends Activity {
 
         // Create a listener for input box
         groupName = findViewById(R.id.input_groupName);
-
-        // used in HomeFragment and apparently not needed in this subView (errors otherwise)
-//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-//        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-//                .setTimestampsInSnapshotsEnabled(true)
-//                .build();
-//        //firestore.setFirestoreSettings(settings);
     }
 
     // Sets guidelines for Group Names

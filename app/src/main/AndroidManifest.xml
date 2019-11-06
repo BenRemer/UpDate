@@ -49,6 +49,8 @@
         <activity
             android:name=".Controller.CreateGroupActivity"
             android:theme="@style/AppTheme.CreateGroupOverlay" />
+        <activity
+            android:name=".Controller.NewStatusActivity" />
     </application>
 
 </manifest>
