@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/side_nav_bar">
+    android:background="@android:color/darker_gray">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input_groupName"
@@ -17,6 +17,8 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/background_light"
+            android:backgroundTint="#FFFFFF"
             android:hint="@string/enter_group_name"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -25,7 +27,7 @@
         android:id="@+id/createGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create"
         android:layout_alignParentBottom="true"
-        android:onClick="createGroup"/>
+        android:onClick="createGroup"
+        android:text="Create" />
 </RelativeLayout>

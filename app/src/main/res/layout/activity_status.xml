@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/side_nav_bar">
+    android:background="@android:color/darker_gray">
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:background="#00FFFFFF"
         app:counterEnabled="true"
         app:counterMaxLength="150"
         app:errorEnabled="true">
@@ -17,21 +18,22 @@
             android:id="@+id/input_newStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/background_light"
+            android:backgroundTint="#FFFFFF"
             android:gravity="top|left"
             android:hint="@string/enter_new_status"
             android:inputType="textMultiLine"
             android:lines="1"
+            android:maxLength="150"
             android:maxLines="3"
-            android:minLines="1"
-            android:maxLength="150" />
+            android:minLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/update_status"
         android:layout_alignParentBottom="true"
         android:onClick="updateStatus"
-        />
+        android:text="@string/update_status" />
 </RelativeLayout>
