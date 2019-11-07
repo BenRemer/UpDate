@@ -34,6 +34,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 
 public class HomeFragment extends Fragment {
@@ -104,7 +105,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> groupTask) {
                         if (groupTask.isSuccessful()) {
-                            for (QueryDocumentSnapshot doc_group : groupTask.getResult()) {
+                            for (QueryDocumentSnapshot doc_group : groupTask.getResult()) { // Each Group a user is connected to
                                 // We must dynamically populate home screen with group information
                                 // for every group user is a part of
 
@@ -128,17 +129,22 @@ public class HomeFragment extends Fragment {
                                 group_card.addView(group_name, params);
 
                                 // 2. Add Users
+//                                Log.d("String", db.collection("Groups").document(doc_group.getId()).toString());
                                 db.collection("Groups")
-                                        .document(Objects.requireNonNull(doc_group.getString("Group_ID")))
+                                        .document(doc_group.getString("Group_ID"))
                                         .collection("Users")
                                         .get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> userTask) {
                                                 if (userTask.isSuccessful()) {
-                                                    for (QueryDocumentSnapshot doc_user : userTask.getResult()) {
+                                                    for (QueryDocumentSnapshot doc_user : userTask.getResult()) { // Each person in a group the user is in
                                                         // 2. Add Users
-                                                        group_user_name.setText(doc_user.getString("Display_Name"));
+//                                                        Map<String, Object> users = doc_user.getData();
+                                                        String name = doc_user.getString("Display_Name");
+                                                        Log.d("Name", name);
+                                                        group_user_name = new TextView(getContext()); // Wrong setup, but adds it
+                                                        group_user_name.setText(name);
                                                         group_card.addView(group_user_name, params);
 
                                                         // 3. Add Status of each user

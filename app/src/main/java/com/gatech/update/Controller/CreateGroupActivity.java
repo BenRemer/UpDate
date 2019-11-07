@@ -76,6 +76,7 @@ public class CreateGroupActivity extends Activity {
 
         // Add the group name to the document
         group.put("Group_Name", name);
+        group.put("Group_ID", "" + groupHash);
 
         // Add the owners information
         user.put("Username", Objects.requireNonNull(mUser.getEmail()));
