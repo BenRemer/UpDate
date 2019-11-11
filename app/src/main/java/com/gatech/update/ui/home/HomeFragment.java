@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gatech.update.Controller.CreateGroupActivity;
+import com.gatech.update.Controller.GroupActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,7 +29,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
@@ -38,7 +38,7 @@ public class HomeFragment extends Fragment {
 
     // recyclerView items
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private GroupAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     // define a list of groups objects
@@ -115,12 +115,24 @@ public class HomeFragment extends Fragment {
 
                             mRecyclerView.setLayoutManager(mLayoutManager);
                             mRecyclerView.setAdapter(mAdapter);
+
+                            mAdapter.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(int position) {
+                                    // Opens new intent for specific group!
+                                    Intent intent = new Intent(getActivity(), GroupActivity.class);
+                                    intent.putExtra("Group", mGroups.get(position));
+
+                                    startActivity(intent);
+                                }
+                            });
                         }
                     }, mGroupIDs.get(i), mGroupNames.get(i));
                 }
             }
         });
         Log.d(TAG, "=DEBUG= Returning root & drawing content");
+
         return root;
     }
 

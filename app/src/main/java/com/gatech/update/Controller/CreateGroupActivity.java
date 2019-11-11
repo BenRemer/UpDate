@@ -89,7 +89,6 @@ public class CreateGroupActivity extends Activity {
         user.put("Permission", "Owner");
 
         // Grab user's status
-        // Not really necessary
 //        db.collection("Users")
 //                .document(userID)
 //                .get()
@@ -97,10 +96,13 @@ public class CreateGroupActivity extends Activity {
 //                    @Override
 //                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 //                        if (task.isSuccessful()) {
-//                            mStatus = Objects.requireNonNull(task.getResult()).getString("Status");
-//                            if (mStatus != null && !mStatus.isEmpty()) {
+//                            mStatus = task.getResult().getString("Status");
+//                            if (mStatus != null) {
 //                                user.put("Status", mStatus);
+//                            } else {
+//                                user.put("Status", "");
 //                            }
+//
 //                        } else {
 //                            Log.d(TAG, "=DEBUG= unable to collect status of user");
 //                        }

@@ -16,29 +16,40 @@ import java.util.Arrays;
 
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHolder> {
     private ArrayList<GroupStructure> mGroups;
+    private OnItemClickListener mListener;
 
-    public static class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
+
+    public static class GroupViewHolder extends RecyclerView.ViewHolder {
         public TextView mGroupName;
         public TextView mUserNames;
         public TextView mStatus;
 
-        public GroupViewHolder(@NonNull View itemView) {
+        public GroupViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
             super(itemView);
             mGroupName = itemView.findViewById(R.id.groupName);
             mUserNames = itemView.findViewById(R.id.userNames);
 
-            itemView.setOnClickListener(this);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener != null) {
+                        // Grab position
+                        int pos = getAdapterPosition();
+                        if (pos != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(pos);
+                        }
+                    }
+                }
+            });
         }
 
-        @Override
-        public void onClick(View v) {
-            // TODO: implement onClick functionality for each group
-            //      should open up a window relating to each group specifics
-            //      should be simple as we have access to the data in each
-            //      & can call it by .get(position)
-
-
-        }
     }
 
     public GroupAdapter(ArrayList<GroupStructure> groups) {
@@ -49,7 +60,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     @Override
     public GroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.example_group, parent, false);
-        GroupViewHolder gHolder = new GroupViewHolder(v);
+        GroupViewHolder gHolder = new GroupViewHolder(v, mListener);
         return gHolder;
     }
 
