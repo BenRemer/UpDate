@@ -10,10 +10,11 @@ public class HomeViewModel extends ViewModel {
 
     public HomeViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Your Groups:");
+        mText.setValue("Home");
     }
 
     public LiveData<String> getText() {
         return mText;
     }
+
 }

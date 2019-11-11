@@ -9,13 +9,19 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
+import com.gatech.update.ui.home.HomeFragment;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +31,8 @@ public class NewStatusActivity extends Activity {
     private FirebaseUser mUser;
     private String userID;
 
+    private ArrayList<String> groupIDs;
+
     private static final String TAG = "NewStatusActivity";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -32,6 +40,8 @@ public class NewStatusActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
+
+        groupIDs = new ArrayList<>();
 
         // Set display metrics to determine area of window
         DisplayMetrics dispM = new DisplayMetrics();
@@ -60,7 +70,7 @@ public class NewStatusActivity extends Activity {
         String status_text = input_status.getText().toString();
         status.put("Status", status_text);
 
-        // Add the user's new status to the database
+        // Add the user's new status to user's database
         db.collection("Users")
                 .document(userID)
                 .update(status)
@@ -80,5 +90,55 @@ public class NewStatusActivity extends Activity {
                     }
                 });
 
+        // We want to retrieve the list of groups the user is a part of
+        readGroupIDs(new HomeFragment.listCallback() {
+            @Override
+            public void onCallback(ArrayList<String> groupIDs) {
+                Log.d(TAG, "=DEBUG= Callback IDs: " + groupIDs.toString());
+
+               // Now with this list, we can begin to update each status
+                for (String ID: groupIDs) {
+                    db.collection("Groups")
+                            .document(ID)
+                            .collection("Users")
+                            .document(userID)
+                            .update(status)
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "=DEBUG= UNABLE TO UPDATE USER GROUPS");
+                                }
+                            });
+                }
+            }
+        });
+
+
+    }
+
+    private void readGroupIDs(final HomeFragment.listCallback callback) {
+        db.collection("Users")
+                .document(userID)
+                .collection("Groups")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> groupTask) {
+                        if (groupTask.isSuccessful()) {
+                            String ID;
+                            for (QueryDocumentSnapshot doc_group : groupTask.getResult()) { // Each Group a user is connected to
+                                // we now have the group's ID
+                                ID = doc_group.getString("Group_ID");
+                                groupIDs.add(ID);
+                            }
+                        } else {
+                            Log.d(TAG, "=DEBUG= Error retrieving group docs.");
+                        }
+                        callback.onCallback(groupIDs);
+                    }
+                });
+    }
+    public interface listCallback {
+        void onCallback(ArrayList<String> data);
     }
 }

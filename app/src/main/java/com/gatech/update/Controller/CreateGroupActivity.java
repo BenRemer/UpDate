@@ -9,11 +9,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -23,6 +26,7 @@ import java.util.Objects;
 public class CreateGroupActivity extends Activity {
     private TextInputLayout groupName;
     private FirebaseUser mUser;
+    private String mStatus;
 
     private static final String TAG = "CreateGroupActivity";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -84,8 +88,24 @@ public class CreateGroupActivity extends Activity {
         user.put("Firebase_ID", userID);
         user.put("Permission", "Owner");
 
-        // TODO: If calculated group hash somehow exists, adding will overwrite a collection
-        //       may want to add a collision condition (like adding 1)
+        // Grab user's status
+        // Not really necessary
+//        db.collection("Users")
+//                .document(userID)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            mStatus = Objects.requireNonNull(task.getResult()).getString("Status");
+//                            if (mStatus != null && !mStatus.isEmpty()) {
+//                                user.put("Status", mStatus);
+//                            }
+//                        } else {
+//                            Log.d(TAG, "=DEBUG= unable to collect status of user");
+//                        }
+//                    }
+//                });
 
         // create document and put group in it
         db.collection("Groups")
