@@ -34,6 +34,7 @@
         <activity
             android:name=".Controller.DrawerActivity"
             android:label="@string/title_activity_drawer"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Controller.MainActivity"

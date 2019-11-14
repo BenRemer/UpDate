@@ -15,6 +15,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,7 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class DrawerActivity extends AppCompatActivity {
+public class DrawerActivity extends PinCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private FirebaseAuth mAuth;

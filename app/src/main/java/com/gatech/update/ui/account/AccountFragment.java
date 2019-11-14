@@ -1,5 +1,6 @@
 package com.gatech.update.ui.account;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,29 +68,46 @@ public class AccountFragment extends Fragment {
 //        });
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final TextView name = root.findViewById(R.id.text_name);
         final TextView status = root.findViewById(R.id.text_status);
         final TextView username = root.findViewById(R.id.name_edittext);
         final TextView email = root.findViewById(R.id.email_edittext);
-        final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
+//        final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
         final Switch pin_switch = root.findViewById(R.id.pin_switch);
+        final EditText timeout_input = root.findViewById(R.id.timeout_input);
+        final TextView timeout_text = root.findViewById(R.id.timeout_text);
         Button update = root.findViewById(R.id.update_button);
         Button logout = root.findViewById(R.id.logout_button);
 
-        // For saving fingerprint information
-        SharedPreferences settings = getContext().getSharedPreferences("Prefs", 0);
-        final SharedPreferences.Editor editor = settings.edit();
+        // For pin
+        final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+
+//        timeout_input.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                timeout_input.setSelection(timeout_input.getText().length());
+//            }
+//        });
+// For saving fingerprint information
+//        SharedPreferences settings = getContext().getSharedPreferences("Prefs", 0);
+//        final SharedPreferences.Editor editor = settings.edit();
 
         // Get from the SharedPreferences
-        SharedPreferences prefs = getContext().getSharedPreferences("Prefs", 0);
-        hasFingerprint = prefs.getBoolean("fingerprint", false);
-        if(hasFingerprint){
-            fingerprint_switch.setChecked(true);
-        }
+//        SharedPreferences prefs = getContext().getSharedPreferences("Prefs", 0);
+//        hasFingerprint = prefs.getBoolean("fingerprint", false);
+//        if(hasFingerprint){
+//            fingerprint_switch.setChecked(true);
+//        }
 
-        if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
-            pin_switch.setChecked(true);
-        }
+//        if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
+//            pin_switch.setChecked(true);
+//            timeout_text.setVisibility(View.VISIBLE);
+//            timeout_input.setVisibility(View.VISIBLE);
+//            timeout_text.setText(Long.toString(lockManager.getAppLock().getTimeout()));
+//        } else {
+//            timeout_text.setVisibility(View.GONE);
+//            timeout_input.setVisibility(View.GONE);
+//        }
+
 
         // Get username and email and update them
         username.setText(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
@@ -117,113 +136,125 @@ public class AccountFragment extends Fragment {
                                 }
                             }
                         });
+                long timeout = Long.parseLong(timeout_input.getText().toString());
+                timeout = timeout * 10000 * 60;
+                if(timeout == 0){
+                    Toast.makeText(getContext(), "Must be at least 1", Toast.LENGTH_LONG).show();
+                    int time =(int) lockManager.getAppLock().getTimeout()/10000/60;
+                    timeout_input.setText(Integer.toString(time));
+                    timeout_input.setSelection(timeout_input.getText().length());
+                } else {
+                    lockManager.getAppLock().enable();
+//                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+                    lockManager.getAppLock().setTimeout(timeout);
+                }
             }
         });
         // For fingerprint
-        Executor newExecutor = Executors.newSingleThreadExecutor();
-        FragmentActivity activity = this.getActivity();
-        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            //onAuthenticationError is called when a fatal error occurrs//
-            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                    if(Looper.myLooper() == null)
-                        Looper.prepare();
-                    updateSwitch(false, root);
-//                    fingerprint_switch.setChecked(false);
-                } else {
-                    //Print a message to Logcat//
-                    Log.d(TAG, "An unrecoverable error occurred");
-                    if(Looper.myLooper() == null)
-                        Looper.prepare();
-                    updateSwitch(false, root);
-//                    fingerprint_switch.setChecked(false);
-                }
-            }
-            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
-            @Override
-            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-                //Print a message to Logcat//
-                Log.d(TAG, "Fingerprint recognised successfully");
-                if(Looper.myLooper() == null)
-                    Looper.prepare();
-                Toast.makeText(getContext(), "Fingerprint Added", Toast.LENGTH_LONG).show();
-                updateSwitch(true, root);
-                editor.putBoolean("fingerprint", true);
-                editor.apply();
-            }
-            //onAuthenticationFailed is called when the fingerprint doesn't match//
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                //Print a message to Logcat//
-                Log.d(TAG, "Fingerprint not recognised");
-                if(Looper.myLooper() == null)
-                    Looper.prepare();
-//                fingerprint_switch.setChecked(false);
-                updateSwitch(false, root);
-            }
-        });
-        // Build fingerprint
-        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Fingerprint")
-                .setDescription("Add Fingerprint to the app")
-                .setNegativeButtonText("Cancel")
-                .build();
-
-        final FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.from(getContext());
+//        Executor newExecutor = Executors.newSingleThreadExecutor();
+//        FragmentActivity activity = this.getActivity();
+//        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
+//            @Override
+//            //onAuthenticationError is called when a fatal error occurrs//
+//            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+//                super.onAuthenticationError(errorCode, errString);
+//                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+//                    if(Looper.myLooper() == null)
+//                        Looper.prepare();
+//                    updateSwitch(false, root);
+////                    fingerprint_switch.setChecked(false);
+//                } else {
+//                    //Print a message to Logcat//
+//                    Log.d(TAG, "An unrecoverable error occurred");
+//                    if(Looper.myLooper() == null)
+//                        Looper.prepare();
+//                    updateSwitch(false, root);
+////                    fingerprint_switch.setChecked(false);
+//                }
+//            }
+//            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
+//            @Override
+//            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+//                super.onAuthenticationSucceeded(result);
+//                //Print a message to Logcat//
+//                Log.d(TAG, "Fingerprint recognised successfully");
+//                if(Looper.myLooper() == null)
+//                    Looper.prepare();
+//                Toast.makeText(getContext(), "Fingerprint Added", Toast.LENGTH_LONG).show();
+//                updateSwitch(true, root);
+//                editor.putBoolean("fingerprint", true);
+//                editor.apply();
+//            }
+//            //onAuthenticationFailed is called when the fingerprint doesn't match//
+//            @Override
+//            public void onAuthenticationFailed() {
+//                super.onAuthenticationFailed();
+//                //Print a message to Logcat//
+//                Log.d(TAG, "Fingerprint not recognised");
+//                if(Looper.myLooper() == null)
+//                    Looper.prepare();
+////                fingerprint_switch.setChecked(false);
+//                updateSwitch(false, root);
+//            }
+//        });
+//        // Build fingerprint
+//        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+//                .setTitle("Fingerprint")
+//                .setDescription("Add Fingerprint to the app")
+//                .setNegativeButtonText("Cancel")
+//                .build();
+//
+//        final FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.from(getContext());
 
         // check if can have fingerprint
-        fingerprint_switch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!fingerprint_switch.isChecked()) {
-                    editor.putBoolean("fingerprint", false);
-                    editor.apply();
-                    Toast.makeText(getContext(), "Fingerprint Removed", Toast.LENGTH_LONG).show();
-                } else {
-                    if (!fingerprintManager.isHardwareDetected()) {
-                        Toast.makeText(getContext(), "Your Device does not have a Fingerprint Sensor", Toast.LENGTH_LONG).show();
-                        fingerprint_switch.setChecked(false);
-                    } else {
-                        // Checks whether fingerprint permission is set on manifest
-                        if (!fingerprintManager.hasEnrolledFingerprints()) {
-                            Toast.makeText(getContext(), "Register at least one fingerprint in Settings", Toast.LENGTH_LONG).show();
-                            fingerprint_switch.setChecked(false);
-                        } else {
-                            myBiometricPrompt.authenticate(promptInfo);
-                        }
-                    }
-                }
-            }
-        });
+//        fingerprint_switch.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (!fingerprint_switch.isChecked()) {
+//                    editor.putBoolean("fingerprint", false);
+//                    editor.apply();
+//                    Toast.makeText(getContext(), "Fingerprint Removed", Toast.LENGTH_LONG).show();
+//                } else {
+//                    if (!fingerprintManager.isHardwareDetected()) {
+//                        Toast.makeText(getContext(), "Your Device does not have a Fingerprint Sensor", Toast.LENGTH_LONG).show();
+//                        fingerprint_switch.setChecked(false);
+//                    } else {
+//                        // Checks whether fingerprint permission is set on manifest
+//                        if (!fingerprintManager.hasEnrolledFingerprints()) {
+//                            Toast.makeText(getContext(), "Register at least one fingerprint in Settings", Toast.LENGTH_LONG).show();
+//                            fingerprint_switch.setChecked(false);
+//                        } else {
+//                            myBiometricPrompt.authenticate(promptInfo);
+//                        }
+//                    }
+//                }
+//            }
+//        });
 
-        // when pin is switched, make it or remove it
+        // Check what state pin_switch is at
         pin_switch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-                if(pin_switch.isChecked()){
+                if(pin_switch.isChecked()){ // If turned on
                     lockManager.enableAppLock(getContext(), CustomPinActivity.class);
                     lockManager.getAppLock().setShouldShowForgot(false);
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
-                } else {
+                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+                    lockManager.getAppLock().setTimeout(600000);
+                } else { // If off
 //                    lockManager.getAppLock().setPasscode(null);
-//                    lockManager.disableAppLock();
+                    lockManager.disableAppLock();
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
                     startActivity(intent);
-//                    Intent intent = new Intent(getContext(), CustomPinActivity.class);
-//                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.UNLOCK_PIN);
-//                    startActivity(intent);
                 }
             }
         });
 
+        // Logout button
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,22 +314,43 @@ public class AccountFragment extends Fragment {
                     }
                 });
 
-        name.setText(user.getDisplayName());
+//        name.setText(user.getDisplayName());
 
         return root;
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+        Switch pin_switch = getView().findViewById(R.id.pin_switch);
+        EditText timeout_input = getView().findViewById(R.id.timeout_input);
+        TextView timeout_text = getView().findViewById(R.id.timeout_text);
+        if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
+            pin_switch.setChecked(true);
+            timeout_text.setVisibility(View.VISIBLE);
+            timeout_input.setVisibility(View.VISIBLE);
+//            long time = lockManager.getAppLock().getTimeout();
+            int time =(int) lockManager.getAppLock().getTimeout()/10000/60;
+            timeout_input.setText(Integer.toString(time));
+//            timeout_input.setText((int)lockManager.getAppLock().getTimeout());
+        } else {
+            timeout_text.setVisibility(View.GONE);
+            timeout_input.setVisibility(View.GONE);
+        }
+    }
+
     public void updateSwitch(final Boolean bool, final View root){
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
-                if(bool)
-                    fingerprint_switch.setChecked(true);
-                else
-                    fingerprint_switch.setChecked(false);
-            }
-        });
+//        getActivity().runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
+//                if(bool)
+//                    fingerprint_switch.setChecked(true);
+//                else
+//                    fingerprint_switch.setChecked(false);
+//            }
+//        });
 
     }
 }
