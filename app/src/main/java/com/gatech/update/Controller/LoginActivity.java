@@ -1,6 +1,7 @@
 package com.gatech.update.Controller;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.google.android.gms.auth.api.Auth;
@@ -19,6 +20,8 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.biometric.BiometricPrompt;
+import androidx.fragment.app.FragmentActivity;
 
 import android.util.Log;
 import android.view.View;
@@ -38,6 +41,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -45,11 +50,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final int RC_SIGN_IN = 9001;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+    private Boolean hasFingerprint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        Executor newExecutor = Executors.newSingleThreadExecutor();
+        FragmentActivity activity = this;
+
+        SharedPreferences prefs = activity.getSharedPreferences("Prefs", 0);
+        hasFingerprint = prefs.getBoolean("fingerprint", false);
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
@@ -69,7 +81,46 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Get auth instance
         mAuth = FirebaseAuth.getInstance();
 
-
+//        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
+//            @Override
+//            //onAuthenticationError is called when a fatal error occurrs//
+//            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+//                super.onAuthenticationError(errorCode, errString);
+//                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+//                } else {
+//                    //Print a message to Logcat//
+//                    Log.d(TAG, "An unrecoverable error occurred");
+//                }
+//            }
+//            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
+//            @Override
+//            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+//                super.onAuthenticationSucceeded(result);
+//                //Print a message to Logcat//
+//                Log.d(TAG, "Fingerprint recognised successfully");
+//            }
+//            //onAuthenticationFailed is called when the fingerprint doesn’t match//
+//            @Override
+//            public void onAuthenticationFailed() {
+//                super.onAuthenticationFailed();
+//                //Print a message to Logcat//
+//                Log.d(TAG, "Fingerprint not recognised");
+//            }
+//        });
+//
+//        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+//                .setTitle("Use Fingerprint")
+//                .setSubtitle("Subtitle")
+//                .setDescription("Description")
+//                .setNegativeButtonText("Cancel")
+//                .build();
+//
+//        findViewById(R.id.launchAuthentication).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                myBiometricPrompt.authenticate(promptInfo);
+//            }
+//        });
     }
 
     @Override
@@ -97,6 +148,48 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private void fingerprintLogin(){
+        Executor newExecutor = Executors.newSingleThreadExecutor();
+        FragmentActivity activity = this;
+        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            //onAuthenticationError is called when a fatal error occurrs//
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                } else {
+                    //Print a message to Logcat//
+                    Log.d(TAG, "An unrecoverable error occurred");
+                }
+            }
+            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                //Print a message to Logcat//
+                Log.d(TAG, "Fingerprint recognised successfully");
+                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+                startActivity(intent);
+            }
+            //onAuthenticationFailed is called when the fingerprint doesn’t match//
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                //Print a message to Logcat//
+                Log.d(TAG, "Fingerprint not recognised");
+            }
+        });
+
+        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Use Fingerprint")
+                .setSubtitle("Subtitle")
+                .setDescription("Description")
+                .setNegativeButtonText("Cancel")
+                .build();
+
+        myBiometricPrompt.authenticate(promptInfo);
+    }
+
     // [START auth_with_google]
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
@@ -113,8 +206,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
-                            startActivity(intent);
+                            if(hasFingerprint){
+                                fingerprintLogin();
+                            } else {
+                                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+                                startActivity(intent);
+                            }
 //                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -153,13 +250,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onStart() {
         super.onStart();
+        SharedPreferences prefs = getApplication().getSharedPreferences("Prefs", 0);
+        hasFingerprint = prefs.getBoolean("fingerprint", false);
 //        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null){
-            Intent intent = new Intent(this, DrawerActivity.class);
-            startActivity(intent);
-            Toast.makeText(getApplicationContext(), "Already Logged In", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Logged in");
+            if(hasFingerprint){
+                fingerprintLogin();
+            } else {
+                Intent intent = new Intent(this, DrawerActivity.class);
+                startActivity(intent);
+                Toast.makeText(getApplicationContext(), "Welcome Back", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Logged in");
+            }
         } else {
             Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Not logged in");

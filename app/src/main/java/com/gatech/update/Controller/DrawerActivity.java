@@ -26,8 +26,8 @@ public class DrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private FirebaseAuth mAuth;
-    private FirebaseDatabase database;
-    private DatabaseReference myRef;
+//    private FirebaseDatabase database;
+//    private DatabaseReference myRef;
     private FirebaseUser mUser;
 
     @Override
@@ -63,7 +63,7 @@ public class DrawerActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         mAuth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance();
+//        database = FirebaseDatabase.getInstance();
         mUser = mAuth.getCurrentUser();
 
 //        myRef = database.getReference("where");
