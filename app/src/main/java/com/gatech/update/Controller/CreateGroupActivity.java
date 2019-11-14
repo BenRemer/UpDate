@@ -27,6 +27,7 @@ public class CreateGroupActivity extends Activity {
     private TextInputLayout groupName;
     private FirebaseUser mUser;
     private String mStatus;
+    private Map<String, Object> group, user;
 
     private static final String TAG = "CreateGroupActivity";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -70,8 +71,8 @@ public class CreateGroupActivity extends Activity {
         // TODO: Create group and add user to database
         //       need current user email, set privilege to OWNER
         // ...
-        final Map<String, Object> group = new HashMap<>();
-        final Map<String, Object> user = new HashMap<>();
+        group = new HashMap<>();
+        user = new HashMap<>();
 
         // used to create group hash
         final String userID = mUser.getUid();
@@ -89,78 +90,108 @@ public class CreateGroupActivity extends Activity {
         user.put("Permission", "Owner");
 
         // Grab user's status
-//        db.collection("Users")
-//                .document(userID)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            mStatus = task.getResult().getString("Status");
-//                            if (mStatus != null) {
-//                                user.put("Status", mStatus);
-//                            } else {
-//                                user.put("Status", "");
-//                            }
-//
-//                        } else {
-//                            Log.d(TAG, "=DEBUG= unable to collect status of user");
-//                        }
-//                    }
-//                });
+        readStatus(new stringCallback() {
+            /** onCallback() is performed after completion of readStatus. This allows us to wait
+             *      for the asynchronous read before we write the critical data back into the db.
+             *
+             * @param status - the returned status of the user. Empty ("") if read fails or not set.
+             */
+            @Override
+            public void onCallback(String status) {
+                Log.d(TAG, "=DEBUG= Callback status: " + status);
 
-        // create document and put group in it
-        db.collection("Groups")
-                .document(Integer.toString(groupHash))
-                .set(group)
-                // --Code via Android Studio Helper menu--
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
+                // create document and put group in it
+                db.collection("Groups")
+                        .document(Integer.toString(groupHash))
+                        .set(group)
+                        // --Code via Android Studio Helper menu--
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            //                    @Override
 //                    public void onSuccess(DocumentReference documentReference) {
 //                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
 //                        finish();
 //                    }
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot written for group");
-                        // create user doc under Users under Group
-                        db.collection("Groups").document(Integer.toString(groupHash)).collection("Users")
-                                .document(userID)
-                                .set(user);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document to Groups", e);
-                        finish();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "DocumentSnapshot written for group");
+                                // create user doc under Users under Group
+                                db.collection("Groups").document(Integer.toString(groupHash)).collection("Users")
+                                        .document(userID)
+                                        .set(user);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document to Groups", e);
+                                finish();
+                            }
+                        });
 
-        // now add the group ID to the associated user collection
+                // now add the group ID to the associated user collection
+                db.collection("Users")
+                        .document(userID)
+                        .update(user)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "DocumentSnapshot written for user");
+                                db.collection("Users")
+                                        .document(userID)
+                                        .collection("Groups")
+                                        .document(Integer.toString(groupHash))
+                                        .set(group);
+                                finish();
+                            }
+
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document to Users", e);
+                                finish();
+                            }
+                        });
+            }
+        }, userID);
+
+    }
+
+    /** readStatus() is called with a user's ID and performs a FireStore read for the user's status
+     *      it adds the status to the user structure (if previously set), or adds an empty status
+     *
+     * @param callback - the callback to call once query complete
+     * @param uID - the user's ID (unchanging) for database queries
+     */
+    private void readStatus(final stringCallback callback, final String uID) {
         db.collection("Users")
-                .document(userID)
-                .set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot written for user");
-                        db.collection("Users")
-                                .document(userID)
-                                .collection("Groups")
-                                .document(Integer.toString(groupHash))
-                                .set(group);
-                        finish();
+        .document(uID)
+        .get()
+        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                String status;
+                if (task.isSuccessful()) {
+                    mStatus = task.getResult().getString("Status");
+                    if (mStatus != null) {
+                        status = mStatus;
+                    } else {
+                        status = "";
                     }
+                } else {
+                    Log.d(TAG, "=DEBUG= unable to collect status of user");
+                    status = "";
+                }
 
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document to Users", e);
-                        finish();
-                    }
-                });
+                callback.onCallback(status);
+            }
+        });
+    }
+
+    /** Callback's interface - holds the onCallback method to be performed
+     */
+    public interface stringCallback {
+        void onCallback(String data);
     }
 }

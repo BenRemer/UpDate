@@ -1,7 +1,5 @@
 package com.gatech.update.ui.account;
 
-import android.widget.TextView;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -12,7 +10,7 @@ public class AccountViewModel extends ViewModel {
 
     public AccountViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is account fragment");
+        mText.setValue("Your Account:");
     }
 
     public LiveData<String> getText() {
