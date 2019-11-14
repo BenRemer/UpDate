@@ -1,5 +1,6 @@
 package com.gatech.update.ui.account;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,6 +26,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.gatech.update.Controller.CustomPinActivity;
+import com.gatech.update.Controller.LoginActivity;
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.managers.AppLock;
 import com.github.omadahealth.lollipin.lib.managers.LockManager;
@@ -71,6 +73,7 @@ public class AccountFragment extends Fragment {
         final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
         final Switch pin_switch = root.findViewById(R.id.pin_switch);
         Button update = root.findViewById(R.id.update_button);
+        Button logout = root.findViewById(R.id.logout_button);
 
         // For saving fingerprint information
         SharedPreferences settings = getContext().getSharedPreferences("Prefs", 0);
@@ -197,17 +200,23 @@ public class AccountFragment extends Fragment {
             }
         });
 
+        // when pin is switched, make it or remove it
         pin_switch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
                 if(pin_switch.isChecked()){
-                    LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
                     lockManager.enableAppLock(getContext(), CustomPinActivity.class);
                     lockManager.getAppLock().setShouldShowForgot(false);
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
                 } else {
+//                    lockManager.getAppLock().setPasscode(null);
+//                    lockManager.disableAppLock();
+                    Intent intent = new Intent(getContext(), CustomPinActivity.class);
+                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
+                    startActivity(intent);
 //                    Intent intent = new Intent(getContext(), CustomPinActivity.class);
 //                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.UNLOCK_PIN);
 //                    startActivity(intent);
@@ -215,7 +224,42 @@ public class AccountFragment extends Fragment {
             }
         });
 
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                builder1.setMessage("Are you sure you want to logout?\nIf you have a passcode it will be removed.");
+                builder1.setCancelable(true);
+                builder1.setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                FirebaseAuth.getInstance().signOut();
+                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                                lockManager.getAppLock().setPasscode(null);
+                                lockManager.disableAppLock();
+                                Intent intent = new Intent(getContext(), LoginActivity.class);
+                                intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
+                                startActivity(intent);
+//                        mGoogleSignInClient.signOut();
+//                        dialog.cancel();
+                            }
+                        });
 
+                builder1.setNegativeButton(
+                        "No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+//                        Intent intent = new Intent(getContext(), HomeFragment.class);
+//                        startActivity(intent);
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+            }
+        });
 
         // Obtain user's status info
         final String userID = user.getUid();

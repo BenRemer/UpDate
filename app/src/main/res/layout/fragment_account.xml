@@ -123,4 +123,14 @@
         app:layout_constraintStart_toEndOf="@+id/textView5"
         app:layout_constraintTop_toBottomOf="@+id/email_edittext" />
 
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="311dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="232dp"
+        android:text="Logout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email_edittext" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
