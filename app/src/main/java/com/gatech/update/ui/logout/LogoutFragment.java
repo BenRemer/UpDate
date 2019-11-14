@@ -15,8 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.gatech.update.Controller.CustomPinActivity;
 import com.gatech.update.Controller.LoginActivity;
 import com.gatech.update.R;
+import com.gatech.update.ui.home.HomeFragment;
+import com.github.omadahealth.lollipin.lib.managers.AppLock;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -49,14 +53,18 @@ public class LogoutFragment extends Fragment {
         });
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
-        builder1.setMessage("Are you sure you want to logout?");
+        builder1.setMessage("Are you sure you want to logout?\nIf you have a passcode it will be removed.");
         builder1.setCancelable(true);
         builder1.setPositiveButton(
                 "Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         FirebaseAuth.getInstance().signOut();
+                        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                        lockManager.getAppLock().setPasscode(null);
+                        lockManager.disableAppLock();
                         Intent intent = new Intent(getContext(), LoginActivity.class);
+                        intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
                         startActivity(intent);
 //                        mGoogleSignInClient.signOut();
 //                        dialog.cancel();
@@ -67,6 +75,8 @@ public class LogoutFragment extends Fragment {
                 "No",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+//                        Intent intent = new Intent(getContext(), HomeFragment.class);
+//                        startActivity(intent);
                         dialog.cancel();
                     }
                 });

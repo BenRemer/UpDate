@@ -14,8 +14,6 @@
         android:textColor="@android:color/holo_green_dark"
         android:textSize="40sp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="35dp" />
 

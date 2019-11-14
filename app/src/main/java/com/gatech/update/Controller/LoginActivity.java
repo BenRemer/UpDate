@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import com.github.omadahealth.lollipin.lib.PinActivity;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
+import com.github.omadahealth.lollipin.lib.managers.AppLock;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -44,18 +48,31 @@ import java.nio.file.Files;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends PinCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "GoogleActivity";
     private static final int RC_SIGN_IN = 9001;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private Boolean hasFingerprint;
+//    private LockManager lockManager = LockManager.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+//        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//        lockManager.enableAppLock(this, CustomPinActivity.class);
+//        if(LockManager.getInstance().getAppLock() != null) {
+//            if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
+//                Toast.makeText(this, "passcode", Toast.LENGTH_LONG).show();
+//                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//                lockManager.enableAppLock(this, CustomPinActivity.class);
+//            }
+//        }
+
+
 
         Executor newExecutor = Executors.newSingleThreadExecutor();
         FragmentActivity activity = this;
@@ -65,9 +82,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
+        Button launchAuthentication = findViewById(R.id.launchAuthentication);
 
         // Button listeners
         signInButton.setOnClickListener(this);
+        launchAuthentication.setOnClickListener(this);
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -81,46 +100,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Get auth instance
         mAuth = FirebaseAuth.getInstance();
 
-//        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
-//            @Override
-//            //onAuthenticationError is called when a fatal error occurrs//
-//            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-//                super.onAuthenticationError(errorCode, errString);
-//                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-//                } else {
-//                    //Print a message to Logcat//
-//                    Log.d(TAG, "An unrecoverable error occurred");
-//                }
-//            }
-//            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
-//            @Override
-//            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-//                super.onAuthenticationSucceeded(result);
-//                //Print a message to Logcat//
-//                Log.d(TAG, "Fingerprint recognised successfully");
-//            }
-//            //onAuthenticationFailed is called when the fingerprint doesn’t match//
-//            @Override
-//            public void onAuthenticationFailed() {
-//                super.onAuthenticationFailed();
-//                //Print a message to Logcat//
-//                Log.d(TAG, "Fingerprint not recognised");
-//            }
-//        });
-//
-//        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-//                .setTitle("Use Fingerprint")
-//                .setSubtitle("Subtitle")
-//                .setDescription("Description")
-//                .setNegativeButtonText("Cancel")
-//                .build();
-//
-//        findViewById(R.id.launchAuthentication).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                myBiometricPrompt.authenticate(promptInfo);
-//            }
-//        });
     }
 
     @Override
@@ -206,12 +185,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            if(hasFingerprint){
-                                fingerprintLogin();
-                            } else {
+//                            if(LockManager.getInstance().getAppLock().isPasscodeSet()){//if(hasFingerprint){
+//                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
+////                                fingerprintLogin();
+////                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
+////                                lockManager.getAppLock().setShouldShowForgot(false);
+//                            } else {
+                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
                                 Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+                                intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                                 startActivity(intent);
-                            }
+//                            }
 //                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -255,6 +241,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null){
+            LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+            lockManager.enableAppLock(this, CustomPinActivity.class);
             if(hasFingerprint){
                 fingerprintLogin();
             } else {
@@ -304,6 +292,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             googleSignIn();
 //        } else if (i == R.id.disconnectButton) {
 //            revokeAccess();
+        } else if(i == R.id.launchAuthentication){
+            Intent intent = new Intent(this, CustomPinActivity.class);
+            intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+            startActivityForResult(intent, 11);
         }
     }
 }

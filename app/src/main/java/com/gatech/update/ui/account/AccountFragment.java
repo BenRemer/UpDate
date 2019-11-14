@@ -1,6 +1,7 @@
 package com.gatech.update.ui.account;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +24,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.gatech.update.Controller.CustomPinActivity;
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.managers.AppLock;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,6 +69,7 @@ public class AccountFragment extends Fragment {
         final TextView username = root.findViewById(R.id.name_edittext);
         final TextView email = root.findViewById(R.id.email_edittext);
         final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
+        final Switch pin_switch = root.findViewById(R.id.pin_switch);
         Button update = root.findViewById(R.id.update_button);
 
         // For saving fingerprint information
@@ -76,6 +81,10 @@ public class AccountFragment extends Fragment {
         hasFingerprint = prefs.getBoolean("fingerprint", false);
         if(hasFingerprint){
             fingerprint_switch.setChecked(true);
+        }
+
+        if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
+            pin_switch.setChecked(true);
         }
 
         // Get username and email and update them
@@ -184,6 +193,24 @@ public class AccountFragment extends Fragment {
                             myBiometricPrompt.authenticate(promptInfo);
                         }
                     }
+                }
+            }
+        });
+
+        pin_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(pin_switch.isChecked()){
+                    LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                    lockManager.enableAppLock(getContext(), CustomPinActivity.class);
+                    lockManager.getAppLock().setShouldShowForgot(false);
+                    Intent intent = new Intent(getContext(), CustomPinActivity.class);
+                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+                    startActivity(intent);
+                } else {
+//                    Intent intent = new Intent(getContext(), CustomPinActivity.class);
+//                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.UNLOCK_PIN);
+//                    startActivity(intent);
                 }
             }
         });
