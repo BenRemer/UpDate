@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gatech.update.Controller.CreateGroupActivity;
-import com.gatech.update.Controller.GroupActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.R;
+import com.gatech.update.ui.group.GroupFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -120,10 +120,27 @@ public class HomeFragment extends Fragment {
                                 @Override
                                 public void onItemClick(int position) {
                                     // Opens new intent for specific group!
-                                    Intent intent = new Intent(getActivity(), GroupActivity.class);
-                                    intent.putExtra("Group", mGroups.get(position));
+                                    // implementation for Activity method
+//                                    Intent intent = new Intent(getActivity(), GroupFragment.class);
+//                                    intent.putExtra("Group", mGroups.get(position));
+//                                    startActivity(intent);
 
-                                    startActivity(intent);
+                                    // implementation for fragment method
+                                    GroupStructure group = mGroups.get(position);
+                                    Bundle bundle = new Bundle();
+//                                    bundle.putString("Group_Name", group.getGroupName());
+//                                    bundle.putStringArrayList("Names", group.getUsers());
+//                                    bundle.putStringArrayList("Status", group.getStatus());
+                                    bundle.putParcelable("Group", group);
+
+                                    GroupFragment frag = new GroupFragment();
+
+                                    frag.setArguments(bundle);
+
+                                    // WORKING CODE TO CHANGE FRAGMENTS WITH BUNDLE
+                                    getFragmentManager().beginTransaction()
+                                            .replace(((ViewGroup)getView().getParent()).getId(), frag)
+                                            .addToBackStack(null).commit();
                                 }
                             });
                         }
