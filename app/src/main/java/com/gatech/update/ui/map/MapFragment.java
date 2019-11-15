@@ -85,11 +85,12 @@ public class MapFragment extends Fragment {
 //        Intent intent = new Intent(getActivity(), MapsActivity.class);
 //        startActivity(intent);
 
-        getActivity().setTitle("Map");
+
 
         mMapView = (MapView) root.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
+        // Define arrays
         mGroups = new ArrayList<>();
         mGroupNames = new ArrayList<>();
         mGroupIDs = new ArrayList<>();
@@ -104,9 +105,33 @@ public class MapFragment extends Fragment {
             e.printStackTrace();
         }
 
+        // If they don't have permissions on, ask
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 99);
             mMapView.onResume();
+            Map<String, Object> Location = new HashMap<>();
+            Location.put("Location", null);
+            db.collection("Users")
+                    .document(user.getUid())
+                    .set(Location, SetOptions.merge())
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        //                    @Override
+//                    public void onSuccess(DocumentReference documentReference) {
+//                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+//                        finish();
+//                    }
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot written for group");
+                            // create user doc under Users under Group
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document to Groups", e);
+                        }
+                    });
             mMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(GoogleMap mMap) {
@@ -114,7 +139,7 @@ public class MapFragment extends Fragment {
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(33.7728837,-84.393816) , 14.0f) );
                 }
             });
-        } else {
+        } else { // They do, find them
             mMapView.onResume(); // needed to get the map to display immediately
             // https://developers.google.com/maps/documentation/android-sdk/current-place-tutorial place tutorial
             mMapView.getMapAsync(new OnMapReadyCallback() {
@@ -159,18 +184,11 @@ public class MapFragment extends Fragment {
                         }
                     };
                     googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
-                    // For dropping a marker at a point on the Map
-//                LatLng sydney = new LatLng(-34, 151);
-//                Location myLocation = googleMap.getMyLocation();
-//                googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker Title").snippet("Marker Description"));
-//
-//                // For zooming automatically to the location of the marker
-//                CameraPosition cameraPosition = new CameraPosition.Builder().target().zoom(12).build();
-//                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                 }
             });
         }
 
+        // Sets GT as a marker
         mMapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
@@ -179,10 +197,6 @@ public class MapFragment extends Fragment {
                 LatLng GT = new LatLng(33.7728837, -84.393816);
 //                Location myLocation = googleMap.getMyLocation();
                 googleMap.addMarker(new MarkerOptions().position(GT).title("Georgia Tech").snippet("Marker Description"));
-//
-//                // For zooming automatically to the location of the marker
-//                CameraPosition cameraPosition = new CameraPosition.Builder().target().zoom(12).build();
-//                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
 
@@ -192,24 +206,20 @@ public class MapFragment extends Fragment {
             public void onCallback(ArrayList<String> groupNames) {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
                 // 2: Acquire a List of User Names (per group)
-                for (int i = 0; i < mGroupNames.size(); i++) {
-                    // Clears users & status lists (Different for each group)
-                    final String groupName = mGroupNames.get(i);
-//                    final int finalI = i;
-                    readUserNames(new listCallback() {
+                for (int i = 0; i < mGroupNames.size(); i++) { // for each group
+                    readUserNames(new listCallback() { // Get's all other uses in all groups you're in
                         @Override
                         public void onCallback(ArrayList<String> userNames) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
-                            for(int i = 0; i < mUsers.size(); i++){
-                                final String userID = mUsers.get(i);
+                            for(int i = 0; i < mUsers.size(); i++){ // For each user in each group
                                 final int finalI = i;
-                                readUserLocations(new listCallback() {
+                                readUserLocations(new listCallback() { // Get's locations of all users
                                     @Override
                                     public void onCallback(ArrayList<String> data) {
                                         // Add locations to map
 //                                        mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
                                         Log.d("Location", "" + mLocations.size());
-                                        for(String loc : mLocations) {
+                                        for(String loc : mLocations) { // For location of each user of each group
                                             Log.d("Location", loc);
                                             // For dropping a marker at a point on the Map
                                             String[] latlong =  loc.split(",");
@@ -221,21 +231,6 @@ public class MapFragment extends Fragment {
                                                     .title(mUsers.get(finalI))
                                                     .snippet(mStatus.get(finalI)));
                                         }
-//                                        mMapView.getMapAsync(new OnMapReadyCallback() {
-//                                            @Override
-//                                            public void onMapReady(GoogleMap googleMap) {
-//                                                Log.d("Location", "Map Ready");
-//                                                for(String loc : mLocations) {
-//                                                    Log.d("Location", loc);
-//                                                    // For dropping a marker at a point on the Map
-//                                                    String[] latlong =  loc.split(",");
-//                                                    double latitude = Double.parseDouble(latlong[0]);
-//                                                    double longitude = Double.parseDouble(latlong[1]);
-//                                                    LatLng friend = new LatLng(latitude, longitude);
-//                                                    googleMap.addMarker(new MarkerOptions().position(friend).title(mUsers.get(finalI)).snippet(mStatus.get(finalI)));
-//                                                }
-//                                            }
-//                                        });
                                     }
                                 }, mUserIDs.get(i), mUsers.get(i), finalI);
                             }
