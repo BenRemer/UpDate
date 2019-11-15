@@ -20,7 +20,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.gatech.update.Controller.GroupActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.Controller.MapsActivity;
 import com.gatech.update.R;

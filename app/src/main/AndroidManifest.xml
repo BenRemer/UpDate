@@ -56,8 +56,6 @@
             android:name=".Controller.NewStatusActivity"
             android:theme="@style/AppTheme.CreateGroupOverlay" />
         <activity
-            android:name=".Controller.GroupActivity"/>
-        <activity
             android:name=".Controller.CustomPinActivity"/>
     </application>
 

@@ -1,16 +1,16 @@
-package com.gatech.update.ui.account;
+package com.gatech.update.ui.group;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class AccountViewModel extends ViewModel {
+public class GroupViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public AccountViewModel() {
+    public GroupViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Your Account:");
+        mText.setValue("This is group fragment");
     }
 
     public LiveData<String> getText() {

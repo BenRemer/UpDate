@@ -9,7 +9,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
-import com.gatech.update.ui.home.HomeFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -56,10 +55,14 @@ public class NewStatusActivity extends Activity {
         input_status = findViewById(R.id.input_newStatus);
     }
 
-    // OnCLick for update button
+    /** updateStatus() reads the text input by the user and updates the relevant FireStore entries
+     *      (for the User file & each group the User is acquainted with)
+     *
+     * @param v - the current view
+     */
     public void updateStatus(View v) {
         // TODO: Either don't allow now input or auto-fill old information
-        //      why? so user doesn't accidentally erase old status by entering nothing
+        //  - can add another callback to perform this (may have to nest within previous callback)
 
         // Obtain information about current user
         mUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -91,7 +94,12 @@ public class NewStatusActivity extends Activity {
                 });
 
         // We want to retrieve the list of groups the user is a part of
-        readGroupIDs(new HomeFragment.listCallback() {
+        readGroupIDs(new listCallback() {
+            /** onCallback() is performed after the completion of readGroupIDs. This allows us to
+             *      wait for the asynchronous read before we write the critical data back to the db.
+             *
+             * @param groupIDs - the returned groupIDs for the user
+             */
             @Override
             public void onCallback(ArrayList<String> groupIDs) {
                 Log.d(TAG, "=DEBUG= Callback IDs: " + groupIDs.toString());
@@ -116,7 +124,12 @@ public class NewStatusActivity extends Activity {
 
     }
 
-    private void readGroupIDs(final HomeFragment.listCallback callback) {
+    /** readGroupIDs() performs a FireStore read for all the groupIDs a user is part of.
+     *      returns the groupID List or an empty list
+     *
+     * @param callback - the callback to call once query is complete
+     */
+    private void readGroupIDs(final listCallback callback) {
         db.collection("Users")
                 .document(userID)
                 .collection("Groups")
@@ -138,6 +151,9 @@ public class NewStatusActivity extends Activity {
                     }
                 });
     }
+
+    /** Callback's interface - holds the onCallback method to be performed
+     */
     public interface listCallback {
         void onCallback(ArrayList<String> data);
     }
