@@ -73,14 +73,16 @@ public class AccountFragment extends Fragment {
         final TextView email = root.findViewById(R.id.email_edittext);
 //        final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
         final Switch pin_switch = root.findViewById(R.id.pin_switch);
-        final EditText timeout_input = root.findViewById(R.id.timeout_input);
-        final TextView timeout_text = root.findViewById(R.id.timeout_text);
+//        final EditText timeout_input = root.findViewById(R.id.timeout_input);
+//        final TextView timeout_text = root.findViewById(R.id.timeout_text);
         Button update = root.findViewById(R.id.update_button);
         Button logout = root.findViewById(R.id.logout_button);
 
         // For pin
         final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+        lockManager.getAppLock().enable();
 
+        getActivity().setTitle("Account Information");
 //        timeout_input.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
@@ -136,18 +138,18 @@ public class AccountFragment extends Fragment {
                                 }
                             }
                         });
-                long timeout = Long.parseLong(timeout_input.getText().toString());
-                timeout = timeout * 10000 * 60;
-                if(timeout == 0){
-                    Toast.makeText(getContext(), "Must be at least 1", Toast.LENGTH_LONG).show();
-                    int time =(int) lockManager.getAppLock().getTimeout()/10000/60;
-                    timeout_input.setText(Integer.toString(time));
-                    timeout_input.setSelection(timeout_input.getText().length());
-                } else {
-                    lockManager.getAppLock().enable();
-//                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-                    lockManager.getAppLock().setTimeout(timeout);
-                }
+//                long timeout = Long.parseLong(timeout_input.getText().toString());
+//                timeout = timeout * 10000 * 60;
+//                if(timeout == 0){
+//                    Toast.makeText(getContext(), "Must be at least 1", Toast.LENGTH_LONG).show();
+//                    int time =(int) lockManager.getAppLock().getTimeout()/1000/60;
+//                    timeout_input.setText(Integer.toString(time));
+//                    timeout_input.setSelection(timeout_input.getText().length());
+//                } else {
+//                    lockManager.getAppLock().enable();
+////                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+//                    lockManager.getAppLock().setTimeout(timeout);
+//                }
             }
         });
         // For fingerprint
@@ -243,7 +245,7 @@ public class AccountFragment extends Fragment {
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
                     lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-                    lockManager.getAppLock().setTimeout(600000);
+                    lockManager.getAppLock().setTimeout(6000);
                 } else { // If off
 //                    lockManager.getAppLock().setPasscode(null);
                     lockManager.disableAppLock();
@@ -324,19 +326,19 @@ public class AccountFragment extends Fragment {
         super.onResume();
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         Switch pin_switch = getView().findViewById(R.id.pin_switch);
-        EditText timeout_input = getView().findViewById(R.id.timeout_input);
-        TextView timeout_text = getView().findViewById(R.id.timeout_text);
+//        EditText timeout_input = getView().findViewById(R.id.timeout_input);
+//        TextView timeout_text = getView().findViewById(R.id.timeout_text);
         if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
             pin_switch.setChecked(true);
-            timeout_text.setVisibility(View.VISIBLE);
-            timeout_input.setVisibility(View.VISIBLE);
+//            timeout_text.setVisibility(View.VISIBLE);
+//            timeout_input.setVisibility(View.VISIBLE);
 //            long time = lockManager.getAppLock().getTimeout();
-            int time =(int) lockManager.getAppLock().getTimeout()/10000/60;
-            timeout_input.setText(Integer.toString(time));
+//            Long time = lockManager.getAppLock().getTimeout();
+//            timeout_input.setText(time.toString());
 //            timeout_input.setText((int)lockManager.getAppLock().getTimeout());
         } else {
-            timeout_text.setVisibility(View.GONE);
-            timeout_input.setVisibility(View.GONE);
+//            timeout_text.setVisibility(View.GONE);
+//            timeout_input.setVisibility(View.GONE);
         }
     }
 
