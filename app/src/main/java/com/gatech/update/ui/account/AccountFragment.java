@@ -1,33 +1,26 @@
 package com.gatech.update.ui.account;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.biometric.BiometricPrompt;
-import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.gatech.update.Controller.CustomPinActivity;
+import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.LoginActivity;
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.managers.AppLock;
@@ -41,18 +34,22 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccountFragment extends Fragment {
 
     private AccountViewModel accountViewModel;
     private DocumentReference userDoc;
-
     private static final String TAG = "AccountFragment";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Boolean hasFingerprint = false;
+    private final long TIME_IMMEDIATE = 60;
+    private final long TIME_ONE = 6000;
+    private final long TIME_TWO = 12000;
+    private final long TIME_FIVE = 30000;
+    private final long TIME_TEN = 60000;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,14 +70,29 @@ public class AccountFragment extends Fragment {
         final TextView email = root.findViewById(R.id.email_edittext);
 //        final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
         final Switch pin_switch = root.findViewById(R.id.pin_switch);
+        final Spinner timeout_spinner = root.findViewById(R.id.timeout_spinner);
 //        final EditText timeout_input = root.findViewById(R.id.timeout_input);
 //        final TextView timeout_text = root.findViewById(R.id.timeout_text);
         Button update = root.findViewById(R.id.update_button);
         Button logout = root.findViewById(R.id.logout_button);
 
+        // Set title to reflect groupname
+        ((DrawerActivity) getActivity()).setActionBarTitle("Account Information");
+
         // For pin
         final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         lockManager.getAppLock().enable();
+
+        // Creating spinner elements
+        List<String> times = new ArrayList<>();
+        times.add("Immediately");
+        times.add("1 Minute");
+        times.add("2 Minutes");
+        times.add("5 Minutes");
+        times.add("10 Minutes");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, times);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        timeout_spinner.setAdapter(dataAdapter);
 
 
         // Get username and email and update them
@@ -110,7 +122,25 @@ public class AccountFragment extends Fragment {
                                 }
                             }
                         });
-//                long timeout = Long.parseLong(timeout_input.getText().toString());
+                String timeout = timeout_spinner.getSelectedItem().toString();
+                switch (timeout){
+                    case "Immediately":
+                        lockManager.getAppLock().setTimeout(TIME_IMMEDIATE);
+                        break;
+                    case "1 Minute":
+                        lockManager.getAppLock().setTimeout(TIME_ONE);
+                        break;
+                    case "2 Minutes":
+                        lockManager.getAppLock().setTimeout(TIME_TWO);
+                        break;
+                    case "5 Minute":
+                        lockManager.getAppLock().setTimeout(TIME_FIVE);
+                        break;
+                    case "10 Minute":
+                        lockManager.getAppLock().setTimeout(TIME_TEN);
+                        break;
+                }
+                Toast.makeText(getContext(), "Account Updated", Toast.LENGTH_LONG).show();
 //                timeout = timeout * 10000 * 60;
 //                if(timeout == 0){
 //                    Toast.makeText(getContext(), "Must be at least 1", Toast.LENGTH_LONG).show();
@@ -137,7 +167,8 @@ public class AccountFragment extends Fragment {
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
                     lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-                    lockManager.getAppLock().setTimeout(60);
+                    lockManager.getAppLock().setTimeout(TIME_IMMEDIATE);
+                    timeout_spinner.setSelection(0);
                 } else { // If off ask for pin before turning off
 //                    lockManager.getAppLock().setPasscode(null);
                     lockManager.disableAppLock();
@@ -217,19 +248,28 @@ public class AccountFragment extends Fragment {
         super.onResume();
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         Switch pin_switch = getView().findViewById(R.id.pin_switch);
-//        EditText timeout_input = getView().findViewById(R.id.timeout_input);
-//        TextView timeout_text = getView().findViewById(R.id.timeout_text);
+        Spinner timeout_input = getView().findViewById(R.id.timeout_spinner);
+        TextView timeout_text = getView().findViewById(R.id.text_timeout);
         if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
             pin_switch.setChecked(true);
-//            timeout_text.setVisibility(View.VISIBLE);
-//            timeout_input.setVisibility(View.VISIBLE);
-//            long time = lockManager.getAppLock().getTimeout();
-//            Long time = lockManager.getAppLock().getTimeout();
+            timeout_text.setVisibility(View.VISIBLE);
+            timeout_input.setVisibility(View.VISIBLE);
+            long time = lockManager.getAppLock().getTimeout();
+            if(time == TIME_IMMEDIATE)
+                timeout_input.setSelection(0);
+            else if(time == TIME_ONE)
+                timeout_input.setSelection(1);
+            else if(time == TIME_TWO)
+                timeout_input.setSelection(2);
+            else if(time == TIME_FIVE)
+                timeout_input.setSelection(3);
+            else
+                timeout_input.setSelection(4);
 //            timeout_input.setText(time.toString());
 //            timeout_input.setText((int)lockManager.getAppLock().getTimeout());
         } else {
-//            timeout_text.setVisibility(View.GONE);
-//            timeout_input.setVisibility(View.GONE);
+            timeout_text.setVisibility(View.GONE);
+            timeout_input.setVisibility(View.GONE);
         }
     }
 }

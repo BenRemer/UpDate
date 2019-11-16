@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gatech.update.Controller.CreateGroupActivity;
+import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.R;
 import com.gatech.update.ui.group.GroupFragment;
@@ -73,6 +74,9 @@ public class HomeFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+        // Set title to reflect groupname
+        ((DrawerActivity) getActivity()).setActionBarTitle("Groups");
 
         // Obtain current user information
         mUser = FirebaseAuth.getInstance().getCurrentUser();

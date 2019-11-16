@@ -20,6 +20,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.Controller.MapsActivity;
 import com.gatech.update.R;
@@ -84,7 +85,8 @@ public class MapFragment extends Fragment {
 //        Intent intent = new Intent(getActivity(), MapsActivity.class);
 //        startActivity(intent);
 
-
+        // Set title to reflect groupname
+        ((DrawerActivity) getActivity()).setActionBarTitle("Map");
 
         mMapView = (MapView) root.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
@@ -199,45 +201,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        // Get groups of the user
-        readGroupNames(new listCallback() {
-            @Override
-            public void onCallback(ArrayList<String> groupNames) {
-                Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
-                // 2: Acquire a List of User Names (per group)
-                for (int i = 0; i < mGroupNames.size(); i++) { // for each group
-                    readUserNames(new listCallback() { // Get's all other uses in all groups you're in
-                        @Override
-                        public void onCallback(ArrayList<String> userNames) {
-                            Log.d(TAG, "=DEBUG= Callback from User Names");
-                            for(int i = 0; i < mUsers.size(); i++){ // For each user in each group
-                                final int finalI = i;
-                                readUserLocations(new listCallback() { // Get's locations of all users
-                                    @Override
-                                    public void onCallback(ArrayList<String> data) {
-                                        // Add locations to map
-//                                        mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
-                                        Log.d("Location", "" + mLocations.size());
-                                        for(String loc : mLocations) { // For location of each user of each group
-                                            Log.d("Location", loc);
-                                            // For dropping a marker at a point on the Map
-                                            String[] latlong =  loc.split(",");
-                                            double latitude = Double.parseDouble(latlong[0]);
-                                            double longitude = Double.parseDouble(latlong[1]);
-                                            LatLng friend = new LatLng(latitude, longitude);
-                                            googleMap.addMarker(new MarkerOptions()
-                                                    .position(friend)
-                                                    .title(mUsers.get(finalI))
-                                                    .snippet(mStatus.get(finalI)));
-                                        }
-                                    }
-                                }, mUserIDs.get(i), mUsers.get(i), finalI);
-                            }
-                        }
-                    }, mGroupIDs.get(i), mGroupNames.get(i));
-                }
-            }
-        });
+        updateMap();
 
         return root;
     }
@@ -322,7 +286,7 @@ public class MapFragment extends Fragment {
                             if (document.exists()) {
                                 Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 String location = document.getString("Location");
-                                Log.d("Location", location);
+//                                Log.d("Location", location);
                                 if(location == null){
                                     mUserIDs.remove(position);
                                     mUsers.remove(position);
@@ -345,10 +309,53 @@ public class MapFragment extends Fragment {
         void onCallback(ArrayList<String> data);
     }
 
+    public void updateMap(){
+        // Get groups of the user
+        readGroupNames(new listCallback() {
+            @Override
+            public void onCallback(ArrayList<String> groupNames) {
+                Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
+                // 2: Acquire a List of User Names (per group)
+                for (int i = 0; i < mGroupNames.size(); i++) { // for each group
+                    readUserNames(new listCallback() { // Get's all other uses in all groups you're in
+                        @Override
+                        public void onCallback(ArrayList<String> userNames) {
+                            Log.d(TAG, "=DEBUG= Callback from User Names");
+                            for(int i = 0; i < mUsers.size(); i++){ // For each user in each group
+                                final int finalI = i;
+                                readUserLocations(new listCallback() { // Get's locations of all users
+                                    @Override
+                                    public void onCallback(ArrayList<String> data) {
+                                        // Add locations to map
+//                                        mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
+                                        Log.d("Location", "" + mLocations.size());
+                                        for(String loc : mLocations) { // For location of each user of each group
+                                            Log.d("Location", loc);
+                                            // For dropping a marker at a point on the Map
+                                            String[] latlong =  loc.split(",");
+                                            double latitude = Double.parseDouble(latlong[0]);
+                                            double longitude = Double.parseDouble(latlong[1]);
+                                            LatLng friend = new LatLng(latitude, longitude);
+                                            googleMap.addMarker(new MarkerOptions()
+                                                    .position(friend)
+                                                    .title(mUsers.get(finalI))
+                                                    .snippet(mStatus.get(finalI)));
+                                        }
+                                    }
+                                }, mUserIDs.get(i), mUsers.get(i), finalI);
+                            }
+                        }
+                    }, mGroupIDs.get(i), mGroupNames.get(i));
+                }
+            }
+        });
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+        updateMap();
     }
 
     @Override
