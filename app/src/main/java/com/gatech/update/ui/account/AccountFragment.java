@@ -1,8 +1,12 @@
 package com.gatech.update.ui.account;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,17 +14,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.gatech.update.Controller.CustomPinActivity;
 import com.gatech.update.Controller.DrawerActivity;
+import com.gatech.update.Controller.LocationService;
 import com.gatech.update.Controller.LoginActivity;
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.managers.AppLock;
@@ -50,6 +58,7 @@ public class AccountFragment extends Fragment {
     private final long TIME_TWO = 12000;
     private final long TIME_FIVE = 30000;
     private final long TIME_TEN = 60000;
+    private boolean background;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -68,20 +77,27 @@ public class AccountFragment extends Fragment {
         final TextView status = root.findViewById(R.id.text_status);
         final TextView username = root.findViewById(R.id.name_edittext);
         final TextView email = root.findViewById(R.id.email_edittext);
-//        final Switch fingerprint_switch = root.findViewById(R.id.fingerprint_switch);
         final Switch pin_switch = root.findViewById(R.id.pin_switch);
         final Spinner timeout_spinner = root.findViewById(R.id.timeout_spinner);
-//        final EditText timeout_input = root.findViewById(R.id.timeout_input);
-//        final TextView timeout_text = root.findViewById(R.id.timeout_text);
+        final Switch location_switch = root.findViewById(R.id.location_switch);
+        final Switch background_switch = root.findViewById(R.id.background_switch);
         Button update = root.findViewById(R.id.update_button);
         Button logout = root.findViewById(R.id.logout_button);
 
-        // Set title to reflect groupname
+        // Set title
         ((DrawerActivity) getActivity()).setActionBarTitle("Account Information");
 
         // For pin
         final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         lockManager.getAppLock().enable();
+
+        final SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
+        SharedPreferences.Editor ed;
+        if(!prefs.contains("background")){
+            ed = prefs.edit();
+            ed.putBoolean("background", true);
+            ed.commit();
+        }
 
         // Creating spinner elements
         List<String> times = new ArrayList<>();
@@ -179,6 +195,33 @@ public class AccountFragment extends Fragment {
             }
         });
 
+        // Location services switch
+        background_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(background_switch.isChecked()){
+                    if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                        Toast.makeText(getContext(), "Must enable location permissions", Toast.LENGTH_LONG).show();
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 99);
+                    } else {
+                        SharedPreferences.Editor ed;
+                        ed = prefs.edit();
+                        ed.putBoolean("background", true);
+                        ed.commit();
+                        Intent background_service = new Intent(getContext(), LocationService.class);
+                        getContext().startService(background_service);
+                    }
+                } else {
+                    SharedPreferences.Editor ed;
+                    ed = prefs.edit();
+                    ed.putBoolean("background", false);
+                    ed.commit();
+                    Intent background_service = new Intent(getContext(), LocationService.class);
+                    getContext().stopService(background_service);
+                }
+            }
+        });
+
         // Logout button
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -248,12 +291,28 @@ public class AccountFragment extends Fragment {
         super.onResume();
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         Switch pin_switch = getView().findViewById(R.id.pin_switch);
+        Switch location_switch = getView().findViewById(R.id.location_switch);
+        Switch background_switch = getView().findViewById(R.id.background_switch);
         Spinner timeout_input = getView().findViewById(R.id.timeout_spinner);
         TextView timeout_text = getView().findViewById(R.id.text_timeout);
+        LinearLayout timeout_layout = getView().findViewById(R.id.timeout_layout);
+        final SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
+        SharedPreferences.Editor ed;
+        if(!prefs.contains("background")){
+            ed = prefs.edit();
+            ed.putBoolean("background", true);
+            ed.commit();
+        }
+        if(prefs.getBoolean("background", false)){
+            background_switch.setChecked(true);
+        }else{
+            background_switch.setChecked(false);
+        }
         if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
             pin_switch.setChecked(true);
-            timeout_text.setVisibility(View.VISIBLE);
-            timeout_input.setVisibility(View.VISIBLE);
+//            timeout_text.setVisibility(View.VISIBLE);
+//            timeout_input.setVisibility(View.VISIBLE);
+            timeout_layout.setVisibility(View.VISIBLE);
             long time = lockManager.getAppLock().getTimeout();
             if(time == TIME_IMMEDIATE)
                 timeout_input.setSelection(0);
@@ -268,8 +327,15 @@ public class AccountFragment extends Fragment {
 //            timeout_input.setText(time.toString());
 //            timeout_input.setText((int)lockManager.getAppLock().getTimeout());
         } else {
-            timeout_text.setVisibility(View.GONE);
-            timeout_input.setVisibility(View.GONE);
+//            timeout_text.setVisibility(View.GONE);
+//            timeout_input.setVisibility(View.GONE);
+            timeout_layout.setVisibility(View.GONE);
         }
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            location_switch.setChecked(true);
+        } else {
+            location_switch.setChecked(false);
+        }
+
     }
 }

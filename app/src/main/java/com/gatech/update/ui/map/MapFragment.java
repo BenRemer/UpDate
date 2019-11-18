@@ -2,6 +2,7 @@ package com.gatech.update.ui.map;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
+import com.gatech.update.Controller.LocationService;
 import com.gatech.update.Controller.MapsActivity;
 import com.gatech.update.R;
 import com.gatech.update.ui.home.GroupAdapter;
@@ -69,6 +71,7 @@ public class MapFragment extends Fragment {
     private ArrayList<String> mUserIDs;
     private ArrayList<String> mStatus;
     private ArrayList<String> mLocations;
+    private Boolean background = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -187,6 +190,18 @@ public class MapFragment extends Fragment {
                     googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
                 }
             });
+            SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
+            SharedPreferences.Editor ed;
+            if(!prefs.contains("background")){
+                ed = prefs.edit();
+                ed.putBoolean("background", true);
+                ed.commit();
+            }
+            background = prefs.getBoolean("background", false);
+            if(background) {
+                Intent background_service = new Intent(getContext(), LocationService.class);
+                getContext().startService(background_service);
+            }
         }
 
         // Sets GT as a marker
@@ -253,7 +268,6 @@ public class MapFragment extends Fragment {
 //                                location = doc_user.getString("Location");
                                 firebase_id = doc_user.getString("Firebase_ID");
                                 // Add to respective lists
-
                                 mUsers.add(user);
                                 mUserIDs.add(firebase_id);
                                 if (status != null) {
