@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.gatech.update.Controller.CreateGroupActivity;
 import com.gatech.update.Controller.CustomPinActivity;
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.LocationService;
@@ -89,7 +90,8 @@ public class AccountFragment extends Fragment {
 
         // For pin
         final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-        lockManager.getAppLock().enable();
+        if(lockManager.getAppLock() != null)
+            lockManager.getAppLock().enable();
 
         final SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
         SharedPreferences.Editor ed;
@@ -179,15 +181,16 @@ public class AccountFragment extends Fragment {
                 if(pin_switch.isChecked()){ // If turned on set lock pi
                     lockManager.enableAppLock(getContext(), CustomPinActivity.class);
                     lockManager.getAppLock().setShouldShowForgot(false);
+                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
-                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+
                     lockManager.getAppLock().setTimeout(TIME_IMMEDIATE);
                     timeout_spinner.setSelection(0);
                 } else { // If off ask for pin before turning off
 //                    lockManager.getAppLock().setPasscode(null);
-                    lockManager.disableAppLock();
+//                    lockManager.disableAppLock();
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
                     startActivity(intent);

@@ -63,8 +63,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-//        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-//        lockManager.enableAppLock(this, CustomPinActivity.class);
+        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+        lockManager.enableAppLock(this, CustomPinActivity.class);
+        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
 //        if(LockManager.getInstance().getAppLock() != null) {
 //            if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
 //                Toast.makeText(this, "passcode", Toast.LENGTH_LONG).show();
@@ -193,11 +194,11 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 ////                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
 ////                                lockManager.getAppLock().setShouldShowForgot(false);
 //                            } else {
-                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
-                                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
-                                intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
-                                startActivity(intent);
+//                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
+//                                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+//                                intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+//                                startActivity(intent);
 //                            }
 //                            updateUI(user);
                         } else {
@@ -242,14 +243,14 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 //        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null){
-            LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-            lockManager.enableAppLock(this, CustomPinActivity.class);
+//            LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//            lockManager.enableAppLock(this, CustomPinActivity.class);
 //            if(hasFingerprint){
 //                fingerprintLogin();
 //            } else {
             Intent intent = new Intent(this, DrawerActivity.class);
             startActivity(intent);
-            Toast.makeText(getApplicationContext(), "Welcome Back", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "Welcome Back", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Logged in");
 //            }
         } else {

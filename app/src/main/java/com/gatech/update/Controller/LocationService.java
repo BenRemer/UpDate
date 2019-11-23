@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LocationService extends Service {
-    public static final String BROADCAST_ACTION = "Hello World";
+    public static final String BROADCAST_ACTION = "Starting Background Services";
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     public LocationManager locationManager;
     public MyLocationListener listener;

@@ -9,6 +9,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.PinActivity;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class CreateGroupActivity extends Activity {
+public class CreateGroupActivity extends PinActivity {
     private TextInputLayout groupName;
     private FirebaseUser mUser;
     private String mStatus;
@@ -31,6 +33,7 @@ public class CreateGroupActivity extends Activity {
 
     private static final String TAG = "CreateGroupActivity";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

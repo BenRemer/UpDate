@@ -3,6 +3,8 @@ package com.gatech.update.ui.group;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
@@ -72,7 +75,23 @@ public class GroupFragment extends Fragment {
             this.ll.addView(text_Name);
             this.ll.addView(text_Status);
         }
+//        root.setFocusableInTouchMode(true);
+//        root.requestFocus();
+//        root.setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                Log.i("Group", "keyCode: " + keyCode);
+//                if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+//                    Log.i("Group", "onKey Back listener is working!!!");
+//                    getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
 
         return root;
     }
+
+
 }

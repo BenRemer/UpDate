@@ -2,6 +2,7 @@ package com.gatech.update.Controller;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -23,7 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class DrawerActivity extends PinCompatActivity {
+public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 
     private AppBarConfiguration mAppBarConfiguration;
     private FirebaseAuth mAuth;
@@ -93,5 +94,14 @@ public class DrawerActivity extends PinCompatActivity {
 
     public void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
+    }
+
+    @Override
+    public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
+        this.finish();
+        Log.d("Back", "back");
+        Intent intent = new Intent(this, DrawerActivity.class);
+        startActivity(intent);
+        super.onBackPressed();
     }
 }

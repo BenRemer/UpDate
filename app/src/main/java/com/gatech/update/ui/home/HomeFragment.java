@@ -1,6 +1,7 @@
 package com.gatech.update.ui.home;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,11 +28,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
@@ -49,6 +54,7 @@ public class HomeFragment extends Fragment {
     private ArrayList<String> mGroupIDs;
     private ArrayList<String> mUsers;
     private ArrayList<String> mStatus;
+    private ArrayList<String> mSeen;
 
     // create tag for debugging
     private String TAG = "DisplayGroupInfo";
@@ -61,12 +67,22 @@ public class HomeFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_home, container, false);
         final TextView textView = root.findViewById(R.id.text_home);
 
+        // At end, we can finally add the data to our recycler view
+        mRecyclerView = root.findViewById(R.id.rview);
+        // this line increases performance & doesn't change size on num of items
+        mRecyclerView.setHasFixedSize(true);
+//        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(null);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
         // create the group list in memory
         mGroups = new ArrayList<>();
         mGroupNames = new ArrayList<>();
         mGroupIDs = new ArrayList<>();
         mUsers = new ArrayList<>();
         mStatus = new ArrayList<>();
+        mSeen = new ArrayList<>();
 
         homeViewModel.getText().observe(this, new Observer<String>() {
             @Override
@@ -99,9 +115,13 @@ public class HomeFragment extends Fragment {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
 
                 // 2: Acquire a List of User Names (per group)
+                mGroups.clear();
+                mRecyclerView.setAdapter(null);
                 for (int i = 0; i < mGroupNames.size(); i++) {
                     // Clears users & status lists (Different for each group)
+                    Log.d("Groups", "" + mGroupNames.size());
                     final String groupName = mGroupNames.get(i);
+                    final String groupID = mGroupIDs.get(i);
                     readUserNames(new listCallback() {
                         @Override
                         public void onCallback(ArrayList<String> userNames) {
@@ -110,19 +130,14 @@ public class HomeFragment extends Fragment {
                             // Add to structure
                             mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
 
-                            // At end, we can finally add the data to our recycler view
-                            mRecyclerView = root.findViewById(R.id.rview);
-                            // this line increases performance & doesn't change size on num of items
-                            mRecyclerView.setHasFixedSize(true);
-                            mLayoutManager = new LinearLayoutManager(getActivity());
                             mAdapter = new GroupAdapter(mGroups);
 
-                            mRecyclerView.setLayoutManager(mLayoutManager);
                             mRecyclerView.setAdapter(mAdapter);
 
                             mAdapter.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(int position) {
+                                    mRecyclerView.setAdapter(null);
                                     // Opens new intent for specific group!
                                     // implementation for Activity method
 //                                    Intent intent = new Intent(getActivity(), GroupFragment.class);
@@ -143,8 +158,8 @@ public class HomeFragment extends Fragment {
 
                                     // WORKING CODE TO CHANGE FRAGMENTS WITH BUNDLE
                                     getFragmentManager().beginTransaction()
-                                            .replace(((ViewGroup)getView().getParent()).getId(), frag)
-                                            .addToBackStack(null).commit();
+                                            .replace(((ViewGroup) getView().getParent()).getId(), frag)
+                                            .commit();//.addToBackStack(getTag()) removed to stop dupes
                                 }
                             });
                         }
@@ -157,29 +172,58 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
+    public void onResume(){
+        super.onResume();
+    }
+
     private void readGroupNames(final listCallback callback) {
         db.collection("Users")
                 .document(mUser.getUid())
                 .collection("Groups")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> groupTask) {
-                        if (groupTask.isSuccessful()) {
-                            String name, ID;
-                            for (QueryDocumentSnapshot doc_group : groupTask.getResult()) { // Each Group a user is connected to
-                                // we now have the group's name & ID
-                                name = doc_group.getString("Group_Name");
-                                mGroupNames.add(name);
-                                ID = doc_group.getString("Group_ID");
-                                mGroupIDs.add(ID);
-                            }
-                        } else {
-                            Log.d(TAG, "=DEBUG= Error retrieving group docs.");
+                    public void onEvent(@Nullable QuerySnapshot groupTask,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        mGroupIDs.clear();
+                        mGroupNames.clear();
+//                        mGroups.clear();
+//                        mRecyclerView.setAdapter(null);
+                        String name, ID;
+                        for (QueryDocumentSnapshot doc_group : groupTask) {
+                            Log.d("Snapshot", doc_group.getString("Group_Name"));
+                            ID = doc_group.getString("Group_ID");
+//                            if(!mGroupIDs.contains(ID)) {
+                            mGroupIDs.add(ID);
+                            name = doc_group.getString("Group_Name");
+                            mGroupNames.add(name);
+//                            }
                         }
                         callback.onCallback(mGroupNames);
                     }
                 });
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> groupTask) {
+//                        if (groupTask.isSuccessful()) {
+//                            String name, ID;
+//                            for (QueryDocumentSnapshot doc_group : groupTask.getResult()) { // Each Group a user is connected to
+//                                // we now have the group's name & ID
+//                                name = doc_group.getString("Group_Name");
+//                                mGroupNames.add(name);
+//                                ID = doc_group.getString("Group_ID");
+//                                mGroupIDs.add(ID);
+//                            }
+//                        } else {
+//                            Log.d(TAG, "=DEBUG= Error retrieving group docs.");
+//                        }
+//                        callback.onCallback(mGroupNames);
+//                    }
+//                });
     }
 
     private void readUserNames(final listCallback callback, String ID, final String name) {
@@ -187,6 +231,34 @@ public class HomeFragment extends Fragment {
         db.collection("Groups")
                 .document(ID)
                 .collection("Users")
+//                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onEvent(@Nullable QuerySnapshot userTask,
+//                                        @Nullable FirebaseFirestoreException e) {
+//                        if (e != null) {
+//                            Log.w(TAG, "Listen failed.", e);
+//                            return;
+//                        }
+//                        String user, status;
+//                        mUsers.clear();
+//                        mStatus.clear();
+////                        mGroups.clear();
+//                        for (QueryDocumentSnapshot doc_user : userTask) {
+////                            Log.d("Snapshot", doc_user.getString("Group_Name"));
+//                            // we now have each of the users' names & status
+//                            user = doc_user.getString("Display_Name");
+//                            status = doc_user.getString("Status");
+//                            // Add to respective lists
+//                            mUsers.add(user);
+//                            if (status != null) {
+//                                mStatus.add(status);
+//                            } else {
+//                                mStatus.add("");
+//                            }
+//                        }
+//                        callback.onCallback(mUsers);
+//                    }
+//                });
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
