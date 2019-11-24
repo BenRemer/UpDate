@@ -7,18 +7,19 @@ import java.util.ArrayList;
 
 public class GroupStructure implements Parcelable {
     // future: images for group
-    private String mGroupName;
-    private ArrayList<String> mUsers;
-    private ArrayList<String> mStatus;
+    private String mGroupName, mGroupID;
+    private ArrayList<String> mUsers, mStatus;
 
-    public GroupStructure(String groupName, ArrayList<String> users, ArrayList<String> status) {
+    public GroupStructure(String groupName, String groupID, ArrayList<String> users, ArrayList<String> status) {
         mGroupName = groupName;
+        mGroupID = groupID;
         mUsers = users;
         mStatus = status;
     }
 
     protected GroupStructure(Parcel in) {
         mGroupName = in.readString();
+        mGroupID = in.readString();
         mUsers = in.createStringArrayList();
         mStatus = in.createStringArrayList();
     }
@@ -39,6 +40,10 @@ public class GroupStructure implements Parcelable {
         return mGroupName;
     }
 
+    public String getGroupID() {
+        return mGroupID;
+    }
+
     public ArrayList<String> getUsers() {
         return mUsers;
     }
@@ -55,6 +60,7 @@ public class GroupStructure implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(mGroupName);
+        parcel.writeString(mGroupID);
         parcel.writeStringList(mUsers);
         parcel.writeStringList(mStatus);
     }

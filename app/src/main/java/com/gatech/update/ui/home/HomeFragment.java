@@ -102,13 +102,14 @@ public class HomeFragment extends Fragment {
                 for (int i = 0; i < mGroupNames.size(); i++) {
                     // Clears users & status lists (Different for each group)
                     final String groupName = mGroupNames.get(i);
+                    final String groupID = mGroupIDs.get(i);
                     readUserNames(new listCallback() {
                         @Override
                         public void onCallback(ArrayList<String> userNames) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
 
                             // Add to structure
-                            mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
+                            mGroups.add(new GroupStructure(groupName, groupID, mUsers, mStatus));
 
                             // At end, we can finally add the data to our recycler view
                             mRecyclerView = root.findViewById(R.id.rview);
