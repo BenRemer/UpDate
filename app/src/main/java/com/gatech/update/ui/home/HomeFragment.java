@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
 
                             // Add to structure
-                            mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
+                            mGroups.add(new GroupStructure(groupName, groupID, mUsers, mStatus));
 
                             mAdapter = new GroupAdapter(mGroups);
 

@@ -24,8 +24,6 @@ import java.util.ArrayList;
 
 public class GroupFragment extends Fragment {
 
-    private GroupViewModel mViewModel;
-    private GroupViewModel groupViewModel;
     private LinearLayout.LayoutParams params;
     private LinearLayout ll;
     private TextView text_Name, text_Status;
@@ -46,6 +44,7 @@ public class GroupFragment extends Fragment {
         ArrayList<String> users = group.getUsers();
         ArrayList<String> status = group.getStatus();
         String groupName = group.getGroupName();
+        String groupID = group.getGroupID();
 
         // Set title to reflect groupname
         ((DrawerActivity) getActivity()).setActionBarTitle(groupName);
