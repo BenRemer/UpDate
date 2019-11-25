@@ -19,22 +19,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.Controller.LocationService;
-import com.gatech.update.Controller.MapsActivity;
 import com.gatech.update.R;
-import com.gatech.update.ui.home.GroupAdapter;
-import com.gatech.update.ui.home.HomeFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -85,8 +79,6 @@ public class MapFragment extends Fragment {
                 textView.setText(s);
             }
         });
-//        Intent intent = new Intent(getActivity(), MapsActivity.class);
-//        startActivity(intent);
 
         // Set title to reflect groupname
         ((DrawerActivity) getActivity()).setActionBarTitle("Map");

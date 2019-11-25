@@ -66,21 +66,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
         lockManager.enableAppLock(this, CustomPinActivity.class);
         lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-//        if(LockManager.getInstance().getAppLock() != null) {
-//            if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
-//                Toast.makeText(this, "passcode", Toast.LENGTH_LONG).show();
-//                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-//                lockManager.enableAppLock(this, CustomPinActivity.class);
-//            }
-//        }
-
-
-
-        Executor newExecutor = Executors.newSingleThreadExecutor();
-//        FragmentActivity activity = this;
-
-//        SharedPreferences prefs = activity.getSharedPreferences("Prefs", 0);
-//        hasFingerprint = prefs.getBoolean("fingerprint", false);
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
@@ -120,64 +105,13 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 //                startActivity(intent);
             } else {
                 Log.d(TAG, "------------------ googleSignInFailure ------------------");
-                // Google Sign In failed, update UI appropriately
-                // [START_EXCLUDE]
-                //Log.d(TAG, result.getStatus().getStatusMessage());
-//                updateUI(null);
-                // [END_EXCLUDE]
             }
         }
     }
 
-//    private void fingerprintLogin(){
-//        Executor newExecutor = Executors.newSingleThreadExecutor();
-//        FragmentActivity activity = this;
-//        final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
-//            @Override
-//            //onAuthenticationError is called when a fatal error occurrs//
-//            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-//                super.onAuthenticationError(errorCode, errString);
-//                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-//                } else {
-//                    //Print a message to Logcat//
-//                    Log.d(TAG, "An unrecoverable error occurred");
-//                }
-//            }
-//            //onAuthenticationSucceeded is called when a fingerprint is matched successfully//
-//            @Override
-//            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-//                super.onAuthenticationSucceeded(result);
-//                //Print a message to Logcat//
-//                Log.d(TAG, "Fingerprint recognised successfully");
-//                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
-//                startActivity(intent);
-//            }
-//            //onAuthenticationFailed is called when the fingerprint doesn’t match//
-//            @Override
-//            public void onAuthenticationFailed() {
-//                super.onAuthenticationFailed();
-//                //Print a message to Logcat//
-//                Log.d(TAG, "Fingerprint not recognised");
-//            }
-//        });
-//
-//        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-//                .setTitle("Use Fingerprint")
-//                .setSubtitle("Subtitle")
-//                .setDescription("Description")
-//                .setNegativeButtonText("Cancel")
-//                .build();
-//
-//        myBiometricPrompt.authenticate(promptInfo);
-//    }
-
     // [START auth_with_google]
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        // [START_EXCLUDE silent]
-//        showProgressDialog();
-        // [END_EXCLUDE]
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -186,32 +120,14 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-//                            if(LockManager.getInstance().getAppLock().isPasscodeSet()){//if(hasFingerprint){
-//                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-//                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
-////                                fingerprintLogin();
-////                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
-////                                lockManager.getAppLock().setShouldShowForgot(false);
-//                            } else {
-//                                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-//                                lockManager.enableAppLock(getApplicationContext(), CustomPinActivity.class);
-//                                Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
-//                                intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
-//                                startActivity(intent);
-//                            }
-//                            updateUI(user);
+                            Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_LONG).show();
+//                            Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+//                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(getApplicationContext(), "Login Failed", Toast.LENGTH_LONG).show();
-//                            Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-//                            updateUI(null);
                         }
-
-                        // [START_EXCLUDE]
-//                        hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
     }
@@ -238,54 +154,32 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-        SharedPreferences prefs = getApplication().getSharedPreferences("Prefs", 0);
-        hasFingerprint = prefs.getBoolean("fingerprint", false);
-//        // Check if user is signed in (non-null) and update UI accordingly.
+//        SharedPreferences prefs = getApplication().getSharedPreferences("Prefs", 0);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null){
-//            LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-//            lockManager.enableAppLock(this, CustomPinActivity.class);
-//            if(hasFingerprint){
-//                fingerprintLogin();
-//            } else {
             Intent intent = new Intent(this, DrawerActivity.class);
             startActivity(intent);
 //            Toast.makeText(getApplicationContext(), "Welcome Back", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Logged in");
-//            }
         } else {
             Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Not logged in");
         }
-//        updateUI(currentUser)
-//        GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
-//        if (alreadyloggedAccount != null) {
-////            Intent intent = new Intent(this, MainActivity.class);
-////            startActivity(intent);
-////            finish();
-//            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
-//            Intent intent = new Intent(this, DrawerActivity.class);
-//            startActivity(intent);
-////            onLoggedIn(alreadyloggedAccount);
-//        } else {
-//            Log.d(TAG, "Not logged in");
-//        }
-
     }
 
-//    private static String getToken(String filePath) {
-//        StringBuilder contentBuilder = new StringBuilder();
-//        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-//
-//            String sCurrentLine;
-//            while ((sCurrentLine = br.readLine()) != null) {
-//                contentBuilder.append(sCurrentLine).append("\n");
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return contentBuilder.toString();
-//    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null){
+            Intent intent = new Intent(this, DrawerActivity.class);
+            startActivity(intent);
+            Log.d(TAG, "Logged in");
+        } else {
+            Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Not logged in");
+        }
+    }
 
     @Override
     public void onClick(View v) {
