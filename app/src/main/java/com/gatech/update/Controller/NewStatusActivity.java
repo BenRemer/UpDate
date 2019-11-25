@@ -1,6 +1,5 @@
 package com.gatech.update.Controller;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -9,6 +8,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NewStatusActivity extends Activity {
+public class NewStatusActivity extends PinCompatActivity {
     // Initialize inputs for updating status
     private TextInputEditText input_status;
     private FirebaseUser mUser;

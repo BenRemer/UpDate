@@ -70,8 +70,6 @@ public class MapFragment extends Fragment {
                 textView.setText(s);
             }
         });
-//        Intent intent = new Intent(getActivity(), MapsActivity.class);
-//        startActivity(intent);
 
         // Set title to reflect groupname
         ((DrawerActivity) getActivity()).setActionBarTitle("Map");
@@ -180,17 +178,17 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Sets GT as a marker
-        mMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap mMap) {
-                googleMap = mMap;
-                // For dropping a marker at a point on the Map
-                LatLng GT = new LatLng(33.7728837, -84.393816);
-//                Location myLocation = googleMap.getMyLocation();
-                googleMap.addMarker(new MarkerOptions().position(GT).title("Georgia Tech").snippet("Marker Description"));
-            }
-        });
+//        // Sets GT as a marker
+//        mMapView.getMapAsync(new OnMapReadyCallback() {
+//            @Override
+//            public void onMapReady(GoogleMap mMap) {
+//                googleMap = mMap;
+//                // For dropping a marker at a point on the Map
+//                LatLng GT = new LatLng(33.7728837, -84.393816);
+////                Location myLocation = googleMap.getMyLocation();
+//                googleMap.addMarker(new MarkerOptions().position(GT).title("Georgia Tech").snippet("Marker Description"));
+//            }
+//        });
 
         updateMap();
 

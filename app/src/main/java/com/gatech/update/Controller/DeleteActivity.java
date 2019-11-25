@@ -8,9 +8,9 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,7 +21,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
-public class DeleteActivity extends AppCompatActivity {
+public class DeleteActivity extends PinCompatActivity {
 
     private Button button_yes, button_no;
 
@@ -70,7 +70,13 @@ public class DeleteActivity extends AppCompatActivity {
             @Override
             public void onCallback(ArrayList<String> data) {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + userIDs.toString());
-
+                // Delete all users in the group first
+                for(String id : data){
+                    db.collection("Groups")
+                            .document(groupID)
+                            .collection("Users")
+                            .document(id).delete();
+                }
                 // Delete primary document of group
                 db.collection("Groups").document(groupID).delete()
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -87,7 +93,7 @@ public class DeleteActivity extends AppCompatActivity {
                         });
 
                 // Delete each instance of group per user
-                for (final String mID: userIDs) {
+                for (final String mID: data) {
                     db.collection("Users").document(mID)
                             .collection("Groups").document(groupID).delete()
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -100,6 +106,20 @@ public class DeleteActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     Log.w(TAG, "Error deleting group for user["+mID+"]");
+                                }
+                            });
+                    db.collection("Users").document(mID)
+                            .collection("Invites").document(groupID).delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Invite for user["+mID+"] removed");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting Invite for user["+mID+"]");
                                 }
                             });
                 }

@@ -8,9 +8,9 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.gatech.update.R;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class InviteUserActivity extends AppCompatActivity {
+public class InviteUserActivity extends PinCompatActivity {
 
     private Button buttonInvite, buttonCancel;
     private TextInputLayout input_email;
@@ -117,11 +117,6 @@ public class InviteUserActivity extends AppCompatActivity {
                 db.collection("Users").document(targID)
                         .collection("Invites").document(groupID).set(invitation)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            //                    @Override
-//                    public void onSuccess(DocumentReference documentReference) {
-//                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-//                        finish();
-//                    }
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Log.d(TAG, "DocumentSnapshot written for invitation");
