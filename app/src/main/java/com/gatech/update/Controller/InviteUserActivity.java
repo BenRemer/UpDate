@@ -56,6 +56,14 @@ public class InviteUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_invite_user);
 
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieves self information
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mID = mUser.getUid();
+        mName = mUser.getDisplayName();
+        mEmail = mUser.getEmail();
+
         // link buttons
         buttonInvite = findViewById(R.id.button_invite);
         buttonCancel = findViewById(R.id.button_cancel);
@@ -86,16 +94,9 @@ public class InviteUserActivity extends AppCompatActivity {
     // If user clicks to invite user - adds group to user invitation
     public void InviteUser(View v) {
         // updates targEmail to input text
-        targEmail = input_email.getEditText().getText().toString().trim();
+        targEmail = input_email.getEditText().getText().toString().toLowerCase().trim();
         if (!validateUser(targEmail))
             return;
-        db = FirebaseFirestore.getInstance();
-
-        // Retrieves self information
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mID = mUser.getUid();
-        mName = mUser.getDisplayName();
-        mEmail = mUser.getEmail();
 
         // Perform search (based on button)
         searchForUser(new stringCallback() {
@@ -142,9 +143,12 @@ public class InviteUserActivity extends AppCompatActivity {
     // currently checks if nothing is entered
     private boolean validateUser(String email) {
         // Set up parameters to check email validity
+//        email = email.toLowerCase();
         String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
         Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
         Matcher match = pattern.matcher(email);
+//        mEmail = mUser.getEmail();
+        Log.d("Validation", "" + email + " " + mEmail);
 
         if (email.isEmpty()) {
             input_email.setError("Field cannot be empty");

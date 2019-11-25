@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
                         inviteNotification.setText(numInvites + " new group invitations!");
 
                     // line increases performance & doesn't change size on num of items
-                    mRVInv.setHasFixedSize(true);
+//                    mRVInv.setHasFixedSize(true);
 
                     mAdapterInv = new InviteAdapter(inviteList);
 

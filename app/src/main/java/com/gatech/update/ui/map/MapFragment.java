@@ -350,10 +350,12 @@ public class MapFragment extends Fragment {
                                             double latitude = Double.parseDouble(latlong[0]);
                                             double longitude = Double.parseDouble(latlong[1]);
                                             LatLng friend = new LatLng(latitude, longitude);
-                                            googleMap.addMarker(new MarkerOptions()
-                                                    .position(friend)
-                                                    .title(mUsers.get(finalI))
-                                                    .snippet(mStatus.get(finalI)));
+                                            if(finalI < mUsers.size()) {
+                                                googleMap.addMarker(new MarkerOptions()
+                                                        .position(friend)
+                                                        .title(mUsers.get(finalI))
+                                                        .snippet(mStatus.get(finalI)));
+                                            }
                                         }
                                     }
                                 }, mUserIDs.get(i), mUsers.get(i), finalI);
