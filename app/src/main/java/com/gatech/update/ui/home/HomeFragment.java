@@ -76,10 +76,6 @@ public class HomeFragment extends Fragment {
         // create the group lists in memory
         mGroups = new ArrayList<>();
         mInvites = new ArrayList<>();
-        mGroupNames = new ArrayList<>();
-        mGroupIDs = new ArrayList<>();
-        mUsers = new ArrayList<>();
-        mStatus = new ArrayList<>();
 
         // Set title to reflect group name
         ((DrawerActivity) getActivity()).setActionBarTitle("Your Groups");
@@ -189,7 +185,8 @@ public class HomeFragment extends Fragment {
 
                 } else {
                     inviteNotification.setHeight(0);
-                    ((ViewGroup) line.getParent()).removeView(line);
+                    if(line.getParent() != null)
+                        ((ViewGroup) line.getParent()).removeView(line);
                 }
 
             }
@@ -199,17 +196,17 @@ public class HomeFragment extends Fragment {
         // 1: Acquire a List of Group Names
         readGroupNames(new listCallback() {
             @Override
-            public void onCallback(ArrayList<String> groupNames) {
+            public void onCallback(ArrayList<String> groupNames, ArrayList<String> groupIDs) {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
-                mGroups.clear();
+//                mGroups.clear();
                 // 2: Acquire a List of User Names (per group)
                 for (int i = 0; i < groupNames.size(); i++) {
                     // Clears users & status lists (Different for each group)
                     final String groupName = groupNames.get(i);
-                    final String groupID = mGroupIDs.get(i);
-                    readUserNames(new dubCallback() {
+                    final String groupID = groupIDs.get(i);
+                    readUserNames(new listCallback() {
                         @Override
-                        public void onDubCallback(ArrayList<String> uNames, ArrayList<String> uStats) {
+                        public void onCallback(ArrayList<String> uNames, ArrayList<String> uStats) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
 
                             // Add to structure
@@ -226,18 +223,9 @@ public class HomeFragment extends Fragment {
                             mAdapterGroup.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(int position) {
-                                    // Opens new intent for specific group!
-                                    // implementation for Activity method
-//                                    Intent intent = new Intent(getActivity(), GroupFragment.class);
-//                                    intent.putExtra("Group", mGroups.get(position));
-//                                    startActivity(intent);
-
                                     // implementation for fragment method
                                     GroupStructure group = mGroups.get(position);
                                     Bundle bundle = new Bundle();
-//                                    bundle.putString("Group_Name", group.getGroupName());
-//                                    bundle.putStringArrayList("Names", group.getUsers());
-//                                    bundle.putStringArrayList("Status", group.getStatus());
                                     bundle.putParcelable("Group", group);
 
                                     GroupFragment frag = new GroupFragment();
@@ -251,7 +239,7 @@ public class HomeFragment extends Fragment {
                                 }
                             });
                         }
-                    }, mGroupIDs.get(i), mGroupNames.get(i));
+                    }, groupID);
                 }
             }
         });
@@ -262,24 +250,25 @@ public class HomeFragment extends Fragment {
 
     private void readInvites(final inviteCallback callback) {
         db.collection("Users").document(mUser.getUid())
-                .collection("Invites").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .collection("Invites")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> inviteTask) {
-                        if (inviteTask.isSuccessful()) {
-                            String groupName, groupID, hostName;
-                            for (QueryDocumentSnapshot doc_invite : inviteTask.getResult()) {
-                                groupName = doc_invite.getString("Group_Name");
-                                groupID = doc_invite.getString("Group_ID");
-                                hostName = doc_invite.getString("Host_Name");
-
-                                mInvites.add(new InviteStructure(groupName, groupID, hostName));
-                                Log.d(TAG, "=DEBUG= Retrieved " + groupName + " & adding to list");
-                            }
-                        } else {
-                            Log.d(TAG, "=DEBUG= Error retrieving invitation docs.");
+                    public void onEvent(@Nullable QuerySnapshot inviteTask,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
                         }
+                        String groupName, groupID, hostName;
+                        mInvites.clear();
+                        for (QueryDocumentSnapshot doc_invite : inviteTask) {
+                            groupName = doc_invite.getString("Group_Name");
+                            groupID = doc_invite.getString("Group_ID");
+                            hostName = doc_invite.getString("Host_Name");
 
+                            mInvites.add(new InviteStructure(groupName, groupID, hostName));
+                            Log.d(TAG, "=DEBUG= Retrieved " + groupName + " & adding to list");
+                        }
                         callback.onCallback(mInvites);
                     }
                 });
@@ -298,22 +287,19 @@ public class HomeFragment extends Fragment {
                             Log.w(TAG, "Listen failed.", e);
                             return;
                         }
-                        mGroupIDs.clear();
-                        mGroupNames.clear();
-                        String name, ID;
+                        ArrayList<String> gName = new ArrayList<>();
+                        ArrayList<String> gID = new ArrayList<>();
                         for (QueryDocumentSnapshot doc_group : groupTask) { // Each Group a user is connected to
                             // we now have the group's name & ID
-                            name = doc_group.getString("Group_Name");
-                            mGroupNames.add(name);
-                            ID = doc_group.getString("Group_ID");
-                            mGroupIDs.add(ID);
+                            gName.add(doc_group.getString("Group_Name"));
+                            gID.add(doc_group.getString("Group_ID"));
                         }
-                        callback.onCallback(mGroupNames);
+                        callback.onCallback(gName, gID);
                     }
                 });
     }
 
-    private void readUserNames(final dubCallback callback, String ID, final String name) {
+    private void readUserNames(final listCallback callback, String ID) {
         Log.d(TAG, "=DEBUG= \tPerforming lookup on " + ID);
         db.collection("Groups")
                 .document(ID)
@@ -326,30 +312,25 @@ public class HomeFragment extends Fragment {
                         ArrayList<String> statuses = new ArrayList<>();
                         if (userTask.isSuccessful()) {
                             String user, status;
-//                            mUsers.clear();
-//                            mStatus.clear();
                             for (QueryDocumentSnapshot doc_user : userTask.getResult()) {
                                 // we now have each of the users' names & status
                                 user = doc_user.getString("Display_Name");
                                 status = doc_user.getString("Status");
 
                                 // Add to respective lists
-//                                mUsers.add(user);
                                 usernames.add(user);
                                 if (status != null) {
-//                                    mStatus.add(status);
                                     statuses.add(status);
                                 } else {
-//                                    mStatus.add("");
                                     statuses.add("");
                                 }
 //                                Log.d(TAG, "=DEBUG= \t\tFound user [" + user + "] : " + status);
                             }
 //                            Log.d(TAG, "=DEBUG= \tSuccess: Retrieved users.");
                         } else {
-//                            Log.d(TAG, "=DEBUG= \tError retrieving user docs");
+                            Log.d(TAG, "=DEBUG= \tError retrieving user docs");
                         }
-                        callback.onDubCallback(usernames, statuses);
+                        callback.onCallback(usernames, statuses);
                     }
                 });
     }
@@ -374,12 +355,9 @@ public class HomeFragment extends Fragment {
     }
 
     public interface listCallback {
-        void onCallback(ArrayList<String> data);
+        void onCallback(ArrayList<String> data_X, ArrayList<String> data_Y);
     }
 
-    public interface dubCallback {
-        void onDubCallback(ArrayList<String> user, ArrayList<String> status);
-    }
 
 
 }

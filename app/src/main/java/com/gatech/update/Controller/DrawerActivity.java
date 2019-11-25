@@ -2,12 +2,10 @@ package com.gatech.update.Controller;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
@@ -22,8 +20,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 
@@ -100,12 +96,13 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         getSupportActionBar().setTitle(title);
     }
 
-    @Override
-    public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
-        this.finish();
-        Log.d("Back", "back");
-        Intent intent = new Intent(this, DrawerActivity.class);
-        startActivity(intent);
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
+////        this.finish();
+//        Log.d("Back", "back");
+//        Intent intent = new Intent(this, DrawerActivity.class);
+//        startActivity(intent);
+//        this.finish();
+////        super.onBackPressed();
+//    }
 }

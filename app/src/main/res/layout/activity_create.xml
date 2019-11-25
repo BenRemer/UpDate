@@ -3,16 +3,38 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ic_border" >
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/ic_border">
+
+    <TextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Create a New Group"
+        android:textStyle="bold"
+        android:textSize="24dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginTop="70dp"
+        android:layout_height="2dp"
+        android:background="#c0c0c0"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input_groupName"
+        android:layout_marginTop="80dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="87dp"
         app:counterEnabled="true"
         app:counterMaxLength="25"
-        app:errorEnabled="true">
+        app:errorEnabled="true" >
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
@@ -21,11 +43,44 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/createGroup"
+
+    <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:onClick="createGroup"
-        android:text="Create" />
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            />
+
+        <Button
+            android:id="@+id/createGroup"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:onClick="createGroup"
+            android:text="Create"
+            android:layout_weight="0"
+            android:textColor="@android:color/white"/>
+
+        <Button
+            android:id="@id/button_cancel"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_border"
+            android:text="cancel"
+            android:layout_weight="0"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </TableRow>
+
 </RelativeLayout>

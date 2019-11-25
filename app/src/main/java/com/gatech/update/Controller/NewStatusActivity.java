@@ -49,7 +49,7 @@ public class NewStatusActivity extends Activity {
         int height = dispM.heightPixels;
 
         // set desired width, height -> can use percentage
-        getWindow().setLayout((int)(width * 0.9), (int)(height * 0.5));
+        getWindow().setLayout((int)(width * 0.9), (int)(height * 0.4));
 
         // Create a listener for input box
         input_status = findViewById(R.id.input_newStatus);

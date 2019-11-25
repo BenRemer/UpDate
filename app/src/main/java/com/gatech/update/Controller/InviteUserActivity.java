@@ -1,29 +1,22 @@
 package com.gatech.update.Controller;
 
 import android.os.Bundle;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.gatech.update.R;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -56,6 +49,14 @@ public class InviteUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_invite_user);
 
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieves self information
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mID = mUser.getUid();
+        mName = mUser.getDisplayName();
+        mEmail = mUser.getEmail();
+
         // link buttons
         buttonInvite = findViewById(R.id.button_invite);
         buttonCancel = findViewById(R.id.button_cancel);
@@ -70,9 +71,10 @@ public class InviteUserActivity extends AppCompatActivity {
         DisplayMetrics dispM = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dispM);
         int width = dispM.widthPixels;
+        int height = dispM.heightPixels;
 
         // set desired width, height -> can use percentage
-        getWindow().setLayout((int)(width * 0.9), 600);
+        getWindow().setLayout((int)(width * 0.9), (int)(height * 0.4));
 
         // If user clicks cancel, back out of activity - no change
         buttonCancel.setOnClickListener(new View.OnClickListener() {
@@ -86,16 +88,9 @@ public class InviteUserActivity extends AppCompatActivity {
     // If user clicks to invite user - adds group to user invitation
     public void InviteUser(View v) {
         // updates targEmail to input text
-        targEmail = input_email.getEditText().getText().toString().trim();
+        targEmail = input_email.getEditText().getText().toString().toLowerCase().trim();
         if (!validateUser(targEmail))
             return;
-        db = FirebaseFirestore.getInstance();
-
-        // Retrieves self information
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mID = mUser.getUid();
-        mName = mUser.getDisplayName();
-        mEmail = mUser.getEmail();
 
         // Perform search (based on button)
         searchForUser(new stringCallback() {
@@ -142,9 +137,12 @@ public class InviteUserActivity extends AppCompatActivity {
     // currently checks if nothing is entered
     private boolean validateUser(String email) {
         // Set up parameters to check email validity
+//        email = email.toLowerCase();
         String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
         Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
         Matcher match = pattern.matcher(email);
+//        mEmail = mUser.getEmail();
+        Log.d("Validation", "" + email + " " + mEmail);
 
         if (email.isEmpty()) {
             input_email.setError("Field cannot be empty");

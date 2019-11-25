@@ -58,7 +58,7 @@
 
         <Button
             android:id="@+id/button_add"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimaryDark"
             android:paddingLeft="10dp"
@@ -71,7 +71,7 @@
 
         <Button
             android:id="@+id/button_cancel"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_border"
             android:text="cancel"

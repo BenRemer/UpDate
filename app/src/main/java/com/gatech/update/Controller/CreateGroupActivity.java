@@ -1,6 +1,5 @@
 package com.gatech.update.Controller;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -10,7 +9,6 @@ import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.PinActivity;
-import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,9 +42,10 @@ public class CreateGroupActivity extends PinActivity {
         DisplayMetrics dispM = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dispM);
         int width = dispM.widthPixels;
+        int height = dispM.heightPixels;
 
         // set desired width, height -> can use percentage
-        getWindow().setLayout((int)(width * 0.6), 500);
+        getWindow().setLayout((int)(width * 0.9), (int)(height * 0.4));
 
         // Create a listener for input box
         groupName = findViewById(R.id.input_groupName);
