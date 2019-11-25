@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,6 +43,10 @@ public class NewStatusActivity extends Activity {
 
         groupIDs = new ArrayList<>();
 
+        // Obtain information about current user
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
+        userID = mUser.getUid();
+
         // Set display metrics to determine area of window
         DisplayMetrics dispM = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dispM);
@@ -53,6 +58,15 @@ public class NewStatusActivity extends Activity {
 
         // Create a listener for input box
         input_status = findViewById(R.id.input_newStatus);
+
+        // Place old status in text window
+        readStatus(new stringCallback() {
+            @Override
+            public void onCallback(String status) {
+                input_status.setText(status);
+            }
+        });
+
     }
 
     /** updateStatus() reads the text input by the user and updates the relevant FireStore entries
@@ -63,10 +77,6 @@ public class NewStatusActivity extends Activity {
     public void updateStatus(View v) {
         // TODO: Either don't allow now input or auto-fill old information
         //  - can add another callback to perform this (may have to nest within previous callback)
-
-        // Obtain information about current user
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
-        userID = mUser.getUid();
 
         // Add status to the map structure
         final Map<String, Object> status = new HashMap<>();
@@ -152,9 +162,33 @@ public class NewStatusActivity extends Activity {
                 });
     }
 
+    private void readStatus(final stringCallback callback) {
+        db.collection("Users").document(userID).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        String status;
+                        if (task.isSuccessful()) {
+                            status = task.getResult().getString("Status");
+                            if (status == null) {
+                                status = "";
+                            }
+                        } else {
+                            Log.d(TAG, "=DEBUG= unable to collect status of user");
+                            status = "";
+                        }
+                        callback.onCallback(status);
+                    }
+                });
+    }
+
     /** Callback's interface - holds the onCallback method to be performed
      */
     public interface listCallback {
         void onCallback(ArrayList<String> data);
+    }
+
+    public interface stringCallback {
+        void onCallback(String data);
     }
 }

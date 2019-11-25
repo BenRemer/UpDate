@@ -3,7 +3,6 @@ package com.gatech.update.ui.home;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,7 +12,6 @@ import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHolder> {
     private ArrayList<GroupStructure> mGroups;
@@ -70,10 +68,14 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         if (size == 1) {
             index = list.get(0).indexOf(' ');
             return list.get(0).substring(0, index);
-        }
-        for (int i = 0; i < size - 1; i++) {
-            index = list.get(i).indexOf(' ');
-            out = out + list.get(i).substring(0, index) + ", ";
+        } else if (size == 2) {
+            index = list.get(0).indexOf(' ');
+            out = out + list.get(0).substring(0, index) + " ";
+        } else {
+            for (int i = 0; i < size - 1; i++) {
+                index = list.get(i).indexOf(' ');
+                out = out + list.get(i).substring(0, index) + ", ";
+            }
         }
         index = list.get(size - 1).indexOf(' ');
         out = out + "& " + list.get(size - 1).substring(0, index);

@@ -5,6 +5,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -98,8 +99,13 @@ public class InviteUserActivity extends AppCompatActivity {
             public void onCallback(String uID) {
                 if(uID == null){
                     input_email.setError("Email does not exist");
+                    Toast.makeText(getApplicationContext(), "Unable to send invitation. "
+                            + targEmail + " is not a member of UpDate", Toast.LENGTH_LONG).show();
                     return;
                 }
+                Toast.makeText(getApplicationContext(), "Invitation sent to " + targName,
+                        Toast.LENGTH_LONG).show();
+
                 // Create a map to store in the DB
                 invitation = new HashMap<>();
                 invitation.put("Group_ID", groupID);

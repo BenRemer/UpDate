@@ -12,29 +12,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gatech.update.Controller.DrawerActivity;
-import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.Controller.LocationService;
-import com.gatech.update.Controller.MapsActivity;
 import com.gatech.update.R;
-import com.gatech.update.ui.home.GroupAdapter;
-import com.gatech.update.ui.home.HomeFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -63,14 +56,6 @@ public class MapFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private static final String TAG = "MapsFragment";
-    private ArrayList<GroupStructure> mGroups;
-    // now a list for users in a certain group & their status...
-    private ArrayList<String> mGroupNames;
-    private ArrayList<String> mGroupIDs;
-    private ArrayList<String> mUsers;
-    private ArrayList<String> mUserIDs;
-    private ArrayList<String> mStatus;
-    private ArrayList<String> mLocations;
     private Boolean background = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -91,17 +76,8 @@ public class MapFragment extends Fragment {
         // Set title to reflect groupname
         ((DrawerActivity) getActivity()).setActionBarTitle("Map");
 
-        mMapView = (MapView) root.findViewById(R.id.mapView);
+        mMapView = root.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
-
-        // Define arrays
-        mGroups = new ArrayList<>();
-        mGroupNames = new ArrayList<>();
-        mGroupIDs = new ArrayList<>();
-        mUsers = new ArrayList<>();
-        mStatus = new ArrayList<>();
-        mLocations = new ArrayList<>();
-        mUserIDs = new ArrayList<>();
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -221,7 +197,7 @@ public class MapFragment extends Fragment {
         return root;
     }
 
-    private void readGroupNames(final listCallback callback) {
+    private void readGroupNames(final multiListCallback callback) {
         db.collection("Users")
                 .document(user.getUid())
                 .collection("Groups")
@@ -229,25 +205,23 @@ public class MapFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> groupTask) {
+                        ArrayList<String> gName = new ArrayList<>();
+                        ArrayList<String> gID = new ArrayList<>();
                         if (groupTask.isSuccessful()) {
-                            String name, ID;
                             for (QueryDocumentSnapshot doc_group : groupTask.getResult()) { // Each Group a user is connected to
                                 // we now have the group's name & ID
-                                name = doc_group.getString("Group_Name");
-                                Log.d("group", name);
-                                mGroupNames.add(name);
-                                ID = doc_group.getString("Group_ID");
-                                mGroupIDs.add(ID);
+                                gName.add(doc_group.getString("Group_Name"));
+                                gID.add(doc_group.getString("Group_ID"));
                             }
                         } else {
                             Log.d(TAG, "=DEBUG= Error retrieving group docs.");
                         }
-                        callback.onCallback(mGroupNames);
+                        callback.onCallback(gName, gID, null);
                     }
                 });
     }
 
-    private void readUserNames(final listCallback callback, String ID, final String name) {
+    private void readUserData(final multiListCallback callback, String ID) {
         Log.d(TAG, "=DEBUG= \tPerforming lookup on " + ID);
         db.collection("Groups")
                 .document(ID)
@@ -256,38 +230,33 @@ public class MapFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> userTask) {
+                        ArrayList<String> uName = new ArrayList<>();
+                        ArrayList<String> uID = new ArrayList<>();
+                        ArrayList<String> uStat = new ArrayList<>();
                         if (userTask.isSuccessful()) {
-                            String user, status, location, firebase_id;
-                            mUsers.clear();
-                            mStatus.clear();
-                            mLocations.clear();
+                            String user, status, firebase_id;
                             for (QueryDocumentSnapshot doc_user : userTask.getResult()) {
-                                // we now have each of the users' names & status
-                                user = doc_user.getString("Display_Name");
-                                status = doc_user.getString("Status");
-//                                location = doc_user.getString("Location");
-                                firebase_id = doc_user.getString("Firebase_ID");
                                 // Add to respective lists
-                                mUsers.add(user);
-                                mUserIDs.add(firebase_id);
-                                if (status != null) {
-                                    mStatus.add(status);
-                                } else {
-                                    mStatus.add("");
-                                }
+                                uName.add(doc_user.getString("Display_Name"));
+                                uID.add(doc_user.getString("Firebase_ID"));
 
-                                Log.d(TAG, "=DEBUG= \t\tFound user [" + user + "] : " + status);
+                                status = doc_user.getString("Status");
+                                if (status != null) {
+                                    uStat.add(status);
+                                } else {
+                                    uStat.add("");
+                                }
                             }
                             Log.d(TAG, "=DEBUG= \tSuccess: Retrieved users.");
                         } else {
                             Log.d(TAG, "=DEBUG= \tError retrieving user docs");
                         }
-                        callback.onCallback(mUsers);
+                        callback.onCallback(uName, uID, uStat);
                     }
                 });
     }
 
-    private void readUserLocations(final listCallback callback, String ID, final String name, final int position) {
+    private void readUserLocations(final listCallback callback, String ID) {
         Log.d(TAG, "=DEBUG= \tPerforming lookup on " + ID);
         db.collection("Users")
                 .document(ID)
@@ -295,18 +264,16 @@ public class MapFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        ArrayList<String> location = new ArrayList<>();
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                                String location = document.getString("Location");
+                                String loc = document.getString("Location");
 //                                Log.d("Location", location);
-                                if(location == null){
-//                                    mUserIDs.remove(position);
-//                                    mUsers.remove(position);
-                                } else {
-                                    Log.d("Location", "Adding location " + location);
-                                    mLocations.add(location);
+                                if(loc != null){
+//                                    Log.d("Location", "Adding location " + loc);
+                                    location.add(loc);
                                 }
                             } else {
                                 Log.d(TAG, "No such document");
@@ -314,54 +281,61 @@ public class MapFragment extends Fragment {
                         } else {
                             Log.d(TAG, "get failed with ", task.getException());
                         }
-                        callback.onCallback(mLocations);
+                        callback.onCallback(location);
                     }
                 });
     }
 
     public interface listCallback {
-        void onCallback(ArrayList<String> data);
+        void onCallback(ArrayList<String> data_X);
+    }
+
+    public interface multiListCallback {
+        void onCallback(ArrayList<String> data_X, ArrayList<String> data_Y, ArrayList<String> data_Z);
     }
 
     public void updateMap(){
         // Get groups of the user
-        readGroupNames(new listCallback() {
+        readGroupNames(new multiListCallback() {
             @Override
-            public void onCallback(ArrayList<String> groupNames) {
-                Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
+            public void onCallback(ArrayList<String> gName, ArrayList<String> gID, ArrayList<String> X) {
+                Log.d(TAG, "=DEBUG= Callback Groups: " + gName.toString());
                 // 2: Acquire a List of User Names (per group)
-                for (int i = 0; i < mGroupNames.size(); i++) { // for each group
-                    readUserNames(new listCallback() { // Get's all other uses in all groups you're in
+                for (int i = 0; i < gName.size(); i++) { // for each group
+
+                    readUserData(new multiListCallback() { // Get's all other uses in all groups you're in
                         @Override
-                        public void onCallback(ArrayList<String> userNames) {
+                        public void onCallback(final ArrayList<String> uName, ArrayList<String> uID, final ArrayList<String> uStat) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
-                            for(int i = 0; i < mUsers.size(); i++){ // For each user in each group
+                            for(int i = 0; i < uName.size(); i++){ // For each user in each group
                                 final int finalI = i;
                                 readUserLocations(new listCallback() { // Get's locations of all users
+
                                     @Override
-                                    public void onCallback(ArrayList<String> data) {
+                                    public void onCallback(ArrayList<String> locations) {
                                         // Add locations to map
-//                                        mGroups.add(new GroupStructure(groupName, mUsers, mStatus));
-                                        Log.d("Location", "" + mLocations.size());
-                                        for(String loc : mLocations) { // For location of each user of each group
+                                        Log.d("Location", "" + locations.size());
+                                        for(String loc : locations) { // For location of each user of each group
                                             Log.d("Location", loc);
                                             // For dropping a marker at a point on the Map
                                             String[] latlong =  loc.split(",");
                                             double latitude = Double.parseDouble(latlong[0]);
                                             double longitude = Double.parseDouble(latlong[1]);
                                             LatLng friend = new LatLng(latitude, longitude);
-                                            if(finalI < mUsers.size()) {
+                                            if(finalI < uName.size()) {
                                                 googleMap.addMarker(new MarkerOptions()
                                                         .position(friend)
-                                                        .title(mUsers.get(finalI))
-                                                        .snippet(mStatus.get(finalI)));
+                                                        .title(uName.get(finalI))
+                                                        .snippet(uStat.get(finalI)));
                                             }
                                         }
                                     }
-                                }, mUserIDs.get(i), mUsers.get(i), finalI);
+                                }, uID.get(i));
+
                             }
                         }
-                    }, mGroupIDs.get(i), mGroupNames.get(i));
+                    }, gID.get(i));
+
                 }
             }
         });
