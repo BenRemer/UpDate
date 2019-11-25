@@ -1,12 +1,14 @@
 package com.gatech.update.ui.home;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,9 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gatech.update.Controller.CreateGroupActivity;
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
+import com.gatech.update.Controller.InviteStructure;
 import com.gatech.update.R;
 import com.gatech.update.ui.group.GroupFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,24 +35,34 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private FirebaseUser mUser;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    // etc. items
+    private TextView inviteNotification;
+    private View line;
+
+    // Information regarding accepted group
+    private InviteStructure invGroup;
+    private String invGroupID, invGroupName;
+    private HashMap<String, Object> hashGroup, hashUser;
+
     // recyclerView items
-    private RecyclerView mRecyclerView;
-    private GroupAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView mRVGroup, mRVInv;
+    private GroupAdapter mAdapterGroup;
+    private InviteAdapter mAdapterInv;
+    private RecyclerView.LayoutManager mLMGroup, mLMInv;
 
     // define a list of groups objects
     private ArrayList<GroupStructure> mGroups;
+    // define a list of invite objects
+    private ArrayList<InviteStructure> mInvites;
     // now a list for users in a certain group & their status...
-    private ArrayList<String> mGroupNames;
-    private ArrayList<String> mGroupIDs;
-    private ArrayList<String> mUsers;
-    private ArrayList<String> mStatus;
+    private ArrayList<String> mGroupNames, mGroupIDs, mUsers, mStatus;
 
     // create tag for debugging
     private String TAG = "DisplayGroupInfo";
@@ -59,24 +73,17 @@ public class HomeFragment extends Fragment {
         homeViewModel =
                 ViewModelProviders.of(this).get(HomeViewModel.class);
         final View root = inflater.inflate(R.layout.fragment_home, container, false);
-        final TextView textView = root.findViewById(R.id.text_home);
 
-        // create the group list in memory
+        // create the group lists in memory
         mGroups = new ArrayList<>();
+        mInvites = new ArrayList<>();
         mGroupNames = new ArrayList<>();
         mGroupIDs = new ArrayList<>();
         mUsers = new ArrayList<>();
         mStatus = new ArrayList<>();
 
-        homeViewModel.getText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
-
-        // Set title to reflect groupname
-        ((DrawerActivity) getActivity()).setActionBarTitle("Groups");
+        // Set title to reflect group name
+        ((DrawerActivity) getActivity()).setActionBarTitle("Your Groups");
 
         // Obtain current user information
         mUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -88,6 +95,107 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 // Begins the new activity (Overlay create group pane)
                 startActivity(new Intent(getActivity(), CreateGroupActivity.class));
+            }
+        });
+
+        // Set up items in display
+        inviteNotification = root.findViewById(R.id.text_notification);
+        line = root.findViewById(R.id.hzLine);
+        mRVInv = root.findViewById(R.id.rInvites);
+        mRVGroup = root.findViewById(R.id.rGroups);
+        // & Layout managers
+        mLMInv = new LinearLayoutManager(getContext());
+        mLMGroup = new LinearLayoutManager(getContext());
+
+        // Read Database information to check for invites
+        // 1: Acquire a List of Invites
+        readInvites(new inviteCallback() {
+            @Override
+            public void onCallback(ArrayList<InviteStructure> inviteList) {
+                Log.d(TAG, "=DEBUG= Callback Invites");
+                int numInvites = inviteList.size();
+
+                // If list is not empty, add cards to view
+                if (numInvites != 0) {
+                    Log.d(TAG, "=DEBUG= invite list size of " + inviteList.size());
+                    inviteNotification.setVisibility(View.VISIBLE);
+                    line.setVisibility(View.VISIBLE);
+                    if (numInvites == 1)
+                        inviteNotification.setText(numInvites + " new group invitation!");
+                    else
+                        inviteNotification.setText(numInvites + " new group invitations!");
+
+                    // line increases performance & doesn't change size on num of items
+                    mRVInv.setHasFixedSize(true);
+
+                    mAdapterInv = new InviteAdapter(inviteList);
+
+                    mRVInv.setLayoutManager(mLMInv);
+                    mRVInv.setAdapter(mAdapterInv);
+
+                    // Create onClick Listener
+                    mAdapterInv.setOnItemClickListener(new InviteAdapter.OnItemClickListener() {
+
+                        @Override
+                        public void onConfirmClick(int position) {
+                            // Updates database to bring you in the group
+                            invGroup = mInvites.get(position);
+                            invGroupID = invGroup.getGroupID();
+                            invGroupName = invGroup.getGroupName();
+
+                            // Add group data to hash
+                            hashGroup = new HashMap<>();
+                            hashGroup.put("Group_ID", invGroupID);
+                            hashGroup.put("Group_Name", invGroupName);
+
+                            // Add user data to hash
+                            hashUser = new HashMap<>();
+                            hashUser.put("Display_Name", mUser.getDisplayName());
+                            hashUser.put("Firebase_ID", mUser.getUid());
+                            hashUser.put("Permission", "User");
+                            hashUser.put("Username", mUser.getEmail());
+                            //TODO: add real-time status addition (would need the oncallback nest)
+
+                            // Updates the list of groups you're a part of
+                            db.collection("Users").document(mUser.getUid())
+                                    .collection("Groups").document(invGroupID)
+                                    .set(hashGroup)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Added groupDoc to user database");
+                                }
+                            });
+
+                            // Adds your user document to the group
+                            db.collection("Groups").document(invGroupID)
+                                    .collection("Users").document(mUser.getUid())
+                                    .set(hashUser)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "Added userDoc to group database");
+                                        }
+                                    });
+
+                            // Delete the invitation
+                            deleteInvitation(invGroupID, position);
+                        }
+
+                        @Override
+                        public void onDeclineClick(int position) {
+                            // Deletes Invitation
+                            invGroup = mInvites.get(position);
+                            invGroupID = invGroup.getGroupID();
+                            deleteInvitation(invGroupID, position);
+                        }
+                    });
+
+                } else {
+                    inviteNotification.setHeight(0);
+                    ((ViewGroup) line.getParent()).removeView(line);
+                }
+
             }
         });
 
@@ -110,18 +218,14 @@ public class HomeFragment extends Fragment {
 
                             // Add to structure
                             mGroups.add(new GroupStructure(groupName, groupID, mUsers, mStatus));
-
-                            // At end, we can finally add the data to our recycler view
-                            mRecyclerView = root.findViewById(R.id.rview);
                             // this line increases performance & doesn't change size on num of items
-                            mRecyclerView.setHasFixedSize(true);
-                            mLayoutManager = new LinearLayoutManager(getActivity());
-                            mAdapter = new GroupAdapter(mGroups);
+                            mRVGroup.setHasFixedSize(true);
+                            mAdapterGroup = new GroupAdapter(mGroups);
 
-                            mRecyclerView.setLayoutManager(mLayoutManager);
-                            mRecyclerView.setAdapter(mAdapter);
+                            mRVGroup.setLayoutManager(mLMGroup);
+                            mRVGroup.setAdapter(mAdapterGroup);
 
-                            mAdapter.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {
+                            mAdapterGroup.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(int position) {
                                     // Opens new intent for specific group!
@@ -157,6 +261,32 @@ public class HomeFragment extends Fragment {
 
         return root;
     }
+
+    private void readInvites(final inviteCallback callback) {
+        db.collection("Users").document(mUser.getUid())
+                .collection("Invites").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> inviteTask) {
+                        if (inviteTask.isSuccessful()) {
+                            String groupName, groupID, hostName;
+                            for (QueryDocumentSnapshot doc_invite : inviteTask.getResult()) {
+                                groupName = doc_invite.getString("Group_Name");
+                                groupID = doc_invite.getString("Group_ID");
+                                hostName = doc_invite.getString("Host_Name");
+
+                                mInvites.add(new InviteStructure(groupName, groupID, hostName));
+                                Log.d(TAG, "=DEBUG= Retrieved " + groupName + " & adding to list");
+                            }
+                        } else {
+                            Log.d(TAG, "=DEBUG= Error retrieving invitation docs.");
+                        }
+
+                        callback.onCallback(mInvites);
+                    }
+                });
+    }
+
 
     private void readGroupNames(final listCallback callback) {
         db.collection("Users")
@@ -217,6 +347,25 @@ public class HomeFragment extends Fragment {
                         callback.onCallback(mUsers);
                     }
                 });
+    }
+
+    private void deleteInvitation(String ID, int pos) {
+        // removes the invitation document
+        db.collection("Users").document(mUser.getUid())
+                .collection("Invites").document(ID).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Invitation deleted from db");
+                    }
+                });
+        // removes from the view
+        mInvites.remove(pos);
+        mAdapterInv.notifyItemRemoved(pos);
+    }
+
+    public interface inviteCallback {
+        void onCallback(ArrayList<InviteStructure> data);
     }
 
     public interface listCallback {

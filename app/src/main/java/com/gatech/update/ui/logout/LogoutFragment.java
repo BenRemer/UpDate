@@ -44,17 +44,11 @@ public class LogoutFragment extends Fragment {
         logoutViewModel =
                 ViewModelProviders.of(this).get(LogoutViewModel.class);
         View root = inflater.inflate(R.layout.fragment_logout, container, false);
-        final TextView textView = root.findViewById(R.id.text_tools);
-        logoutViewModel.getText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
         builder1.setMessage("Are you sure you want to logout?\nIf you have a passcode it will be removed.");
         builder1.setCancelable(true);
+
         builder1.setPositiveButton(
                 "Yes",
                 new DialogInterface.OnClickListener() {

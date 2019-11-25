@@ -31,4 +31,8 @@
     <string name="title_activity_maps">Map</string>
     <string name="enter_new_status">Enter New Status</string>
     <string name="update_status">Update Status</string>
+    <string name="title_activity_delete">DeleteActivity</string>
+    <string name="title_activity_invite_user">InviteUserActivity</string>
+    <string name="user"><![CDATA[<User>]]></string>
+    <string name="num_group_invites">num group invites</string>
 </resources>

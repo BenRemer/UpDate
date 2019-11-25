@@ -6,9 +6,9 @@
     android:orientation="vertical"
     android:layout_weight="0"
     android:background="@color/cardview_light_background"
-    android:layout_marginStart="20dp"
-    android:layout_marginEnd="20dp"
-    android:layout_marginTop="10dp">
+    android:layout_margin="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
     <LinearLayout
         android:id="@+id/l_layout"
@@ -28,12 +28,11 @@
             android:id="@+id/button_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
             android:layout_gravity="left"
+            android:layout_marginBottom="30dp"
             android:layout_weight="0"
             android:text="Delete Group"
-            tools:visibility="visible"
-            />
+            tools:visibility="visible" />
 
         <Button
             android:layout_width="fill_parent"
@@ -46,11 +45,10 @@
             android:id="@+id/button_invite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
             android:layout_weight="0"
-            android:text="Invite New User"
-            />
+            android:text="Invite New User" />
 
 
         <Button

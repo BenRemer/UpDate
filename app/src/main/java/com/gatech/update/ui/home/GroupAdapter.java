@@ -3,6 +3,7 @@ package com.gatech.update.ui.home;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,6 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     public static class GroupViewHolder extends RecyclerView.ViewHolder {
         public TextView mGroupName;
         public TextView mUserNames;
-        public TextView mStatus;
 
         public GroupViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
             super(itemView);
@@ -48,12 +48,37 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
                     }
                 }
             });
+
         }
 
     }
 
     public GroupAdapter(ArrayList<GroupStructure> groups) {
         mGroups = groups;
+    }
+
+    /** Takes in a list of names & outputs a string of the first names
+     *
+     * @param list list of user names
+     * @return string of first names, delimited by commas
+     */
+    private String parseFirstNames(ArrayList<String> list) {
+        String out = "";
+        int size = list.size();
+        int index;
+
+        if (size == 1) {
+            index = list.get(0).indexOf(' ');
+            return list.get(0).substring(0, index);
+        }
+        for (int i = 0; i < size - 1; i++) {
+            index = list.get(i).indexOf(' ');
+            out = out + list.get(i).substring(0, index) + ", ";
+        }
+        index = list.get(size - 1).indexOf(' ');
+        out = out + "& " + list.get(size - 1).substring(0, index);
+
+        return out;
     }
 
     @NonNull
@@ -67,9 +92,12 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     @Override
     public void onBindViewHolder(@NonNull GroupViewHolder holder, int position) {
         GroupStructure currentGroup = mGroups.get(position);
+        String usernames;
 
         holder.mGroupName.setText(currentGroup.getGroupName());
-        holder.mUserNames.setText(Arrays.toString(currentGroup.getUsers().toArray()));
+        // Obtain list of usernames
+        usernames = "with " + parseFirstNames(currentGroup.getUsers()) + ".";
+        holder.mUserNames.setText(usernames);
     }
 
     @Override
