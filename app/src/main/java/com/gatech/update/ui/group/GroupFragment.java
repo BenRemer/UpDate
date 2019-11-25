@@ -23,6 +23,14 @@ import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.GroupStructure;
 import com.gatech.update.Controller.InviteUserActivity;
 import com.gatech.update.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -44,6 +52,8 @@ public class GroupFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_group, container, false);
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseAuth user = FirebaseAuth.getInstance();
         // Fetches content from item user clicks on
         Bundle bundle = this.getArguments();
         GroupStructure group = bundle.getParcelable("Group");
@@ -63,8 +73,28 @@ public class GroupFragment extends Fragment {
         );
 
         buttonDelete = root.findViewById(R.id.button_delete);
+        buttonDelete.setVisibility(View.GONE); // Defaults to button being gone
         buttonInvite = root.findViewById(R.id.button_invite);
-
+        // Find if user is the owner of the group, if so allow them to delete the group
+        db.collection("Groups")
+                .document(groupID)
+                .collection("Users")
+                .document(user.getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                       @Override
+                       public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                           if (task.isSuccessful()) {
+                               DocumentSnapshot document = task.getResult();
+                               if (document != null) {
+                                   String permission = document.getString("Permission");
+                                   if (permission.equals("Owner")) {
+                                       buttonDelete.setVisibility(View.VISIBLE);
+                                   }
+                               }
+                           }
+                       }
+                   });
         // We wish to dynamically add information of each user inside the group
         Context ctx = root.getContext();
         for (int i = 0; i < users.size(); i++) {

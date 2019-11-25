@@ -2,6 +2,7 @@ package com.gatech.update.Controller;
 
 import android.os.Bundle;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class InviteUserActivity extends AppCompatActivity {
+public class InviteUserActivity extends PinCompatActivity {
 
     private Button buttonInvite, buttonCancel;
     private TextInputLayout input_email;
@@ -78,9 +79,10 @@ public class InviteUserActivity extends AppCompatActivity {
         DisplayMetrics dispM = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dispM);
         int width = dispM.widthPixels;
+        int hight = dispM.heightPixels;
 
         // set desired width, height -> can use percentage
-        getWindow().setLayout((int)(width * 0.9), 600);
+        getWindow().setLayout((int)(width * 0.9), (int)(hight * .3));
 
         // If user clicks cancel, back out of activity - no change
         buttonCancel.setOnClickListener(new View.OnClickListener() {

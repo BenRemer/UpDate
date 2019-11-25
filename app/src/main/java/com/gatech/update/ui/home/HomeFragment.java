@@ -1,20 +1,17 @@
 package com.gatech.update.ui.home;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -127,9 +124,6 @@ public class HomeFragment extends Fragment {
                     else
                         inviteNotification.setText(numInvites + " new group invitations!");
 
-                    // line increases performance & doesn't change size on num of items
-//                    mRVInv.setHasFixedSize(true);
-
                     mAdapterInv = new InviteAdapter(inviteList);
 
                     mRVInv.setLayoutManager(mLMInv);
@@ -210,17 +204,19 @@ public class HomeFragment extends Fragment {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
                 mGroups.clear();
                 // 2: Acquire a List of User Names (per group)
-                for (int i = 0; i < mGroupNames.size(); i++) {
+                for (int i = 0; i < groupNames.size(); i++) {
                     // Clears users & status lists (Different for each group)
-                    final String groupName = mGroupNames.get(i);
+                    final String groupName = groupNames.get(i);
                     final String groupID = mGroupIDs.get(i);
-                    readUserNames(new listCallback() {
+                    readUserNames(new dubCallback() {
                         @Override
-                        public void onCallback(ArrayList<String> userNames) {
+                        public void onDubCallback(ArrayList<String> uNames, ArrayList<String> uStats) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
 
                             // Add to structure
-                            mGroups.add(new GroupStructure(groupName, groupID, mUsers, mStatus));
+                            Log.d(TAG, "=DEBUG= Group["+groupName+"]: has usernames["+uNames+"] & statuses["+uStats+"].");
+
+                            mGroups.add(new GroupStructure(groupName, groupID, uNames, uStats));
                             // this line increases performance & doesn't change size on num of items
                             mRVGroup.setHasFixedSize(true);
                             mAdapterGroup = new GroupAdapter(mGroups);
@@ -319,7 +315,7 @@ public class HomeFragment extends Fragment {
                 });
     }
 
-    private void readUserNames(final listCallback callback, String ID, final String name) {
+    private void readUserNames(final dubCallback callback, String ID, final String name) {
         Log.d(TAG, "=DEBUG= \tPerforming lookup on " + ID);
         db.collection("Groups")
                 .document(ID)
@@ -328,29 +324,34 @@ public class HomeFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> userTask) {
+                        ArrayList<String> usernames = new ArrayList<>();
+                        ArrayList<String> statuses = new ArrayList<>();
                         if (userTask.isSuccessful()) {
                             String user, status;
-                            mUsers.clear();
-                            mStatus.clear();
+//                            mUsers.clear();
+//                            mStatus.clear();
                             for (QueryDocumentSnapshot doc_user : userTask.getResult()) {
                                 // we now have each of the users' names & status
                                 user = doc_user.getString("Display_Name");
                                 status = doc_user.getString("Status");
 
                                 // Add to respective lists
-                                mUsers.add(user);
+//                                mUsers.add(user);
+                                usernames.add(user);
                                 if (status != null) {
-                                    mStatus.add(status);
+//                                    mStatus.add(status);
+                                    statuses.add(status);
                                 } else {
-                                    mStatus.add("");
+//                                    mStatus.add("");
+                                    statuses.add("");
                                 }
-                                Log.d(TAG, "=DEBUG= \t\tFound user [" + user + "] : " + status);
+//                                Log.d(TAG, "=DEBUG= \t\tFound user [" + user + "] : " + status);
                             }
-                            Log.d(TAG, "=DEBUG= \tSuccess: Retrieved users.");
+//                            Log.d(TAG, "=DEBUG= \tSuccess: Retrieved users.");
                         } else {
-                            Log.d(TAG, "=DEBUG= \tError retrieving user docs");
+//                            Log.d(TAG, "=DEBUG= \tError retrieving user docs");
                         }
-                        callback.onCallback(mUsers);
+                        callback.onDubCallback(usernames, statuses);
                     }
                 });
     }
@@ -377,5 +378,10 @@ public class HomeFragment extends Fragment {
     public interface listCallback {
         void onCallback(ArrayList<String> data);
     }
+
+    public interface dubCallback {
+        void onDubCallback(ArrayList<String> user, ArrayList<String> status);
+    }
+
 
 }
