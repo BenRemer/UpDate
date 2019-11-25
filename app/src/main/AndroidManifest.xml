@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.gatech.update">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -17,10 +16,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".Controller.InviteUserActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"/>
+        <activity
+            android:name=".Controller.DeleteActivity"
+            android:theme="@style/Theme.AppCompat.Translucent" />
+
         <service
             android:name=".Controller.LocationService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -55,10 +61,11 @@
         </activity>
         <activity
             android:name=".Controller.CreateGroupActivity"
-            android:theme="@style/AppTheme.CreateGroupOverlay" />
+            android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
             android:name=".Controller.NewStatusActivity"
-            android:theme="@style/AppTheme.CreateGroupOverlay" />
+            android:theme="@style/Theme.AppCompat.Translucent" />
+
         <activity android:name=".Controller.CustomPinActivity" />
     </application>
 

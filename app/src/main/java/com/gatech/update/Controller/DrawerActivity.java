@@ -17,6 +17,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.PinCompatActivity;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -52,6 +53,9 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Grabs the header inside of nav view - edit header relative to user
         View navHead = navigationView.getHeaderView(0);
+
+        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.

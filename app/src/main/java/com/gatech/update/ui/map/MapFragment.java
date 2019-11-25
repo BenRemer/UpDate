@@ -302,8 +302,8 @@ public class MapFragment extends Fragment {
                                 String location = document.getString("Location");
 //                                Log.d("Location", location);
                                 if(location == null){
-                                    mUserIDs.remove(position);
-                                    mUsers.remove(position);
+//                                    mUserIDs.remove(position);
+//                                    mUsers.remove(position);
                                 } else {
                                     Log.d("Location", "Adding location " + location);
                                     mLocations.add(location);

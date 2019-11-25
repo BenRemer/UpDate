@@ -39,10 +39,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.google.firebase:firebase-database:19.1.0'
     implementation 'androidx.biometric:biometric:1.0.0-alpha03'
-    compile ('com.github.omadahealth:lollipin:2.1.0@aar') {
+    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
         transitive = true
     }
 }
 
 apply plugin: 'com.google.gms.google-services'
-
