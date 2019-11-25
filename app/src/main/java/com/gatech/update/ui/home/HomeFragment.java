@@ -198,7 +198,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onCallback(ArrayList<String> groupNames, ArrayList<String> groupIDs) {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
-//                mGroups.clear();
+                mGroups.clear();
                 // 2: Acquire a List of User Names (per group)
                 for (int i = 0; i < groupNames.size(); i++) {
                     // Clears users & status lists (Different for each group)
@@ -287,6 +287,7 @@ public class HomeFragment extends Fragment {
                             Log.w(TAG, "Listen failed.", e);
                             return;
                         }
+                        mGroups.clear();
                         ArrayList<String> gName = new ArrayList<>();
                         ArrayList<String> gID = new ArrayList<>();
                         for (QueryDocumentSnapshot doc_group : groupTask) { // Each Group a user is connected to

@@ -2,6 +2,7 @@ package com.gatech.update.Controller;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -96,13 +97,13 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         getSupportActionBar().setTitle(title);
     }
 
-//    @Override
-//    public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
-////        this.finish();
-//        Log.d("Back", "back");
-//        Intent intent = new Intent(this, DrawerActivity.class);
-//        startActivity(intent);
+    @Override
+    public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
 //        this.finish();
-////        super.onBackPressed();
-//    }
+//        Log.d("Back", "back");
+//        this.finish();
+        Intent intent = new Intent(this, DrawerActivity.class);
+        startActivity(intent);
+//        super.onBackPressed();
+    }
 }

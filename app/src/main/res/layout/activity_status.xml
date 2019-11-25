@@ -23,6 +23,7 @@
         android:layout_height="2dp"
         android:background="#c0c0c0"/>
 
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_marginTop="80dp"
         android:layout_width="match_parent"
@@ -44,7 +45,76 @@
             android:inputType="textMultiLine"
             android:lines="4"
             android:maxLength="150" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_quiet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Need Quiet" />
+
+                <RadioButton
+                    android:id="@+id/radio_studying"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Studying" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_avaliable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Avaliable" />
+
+                <RadioButton
+                    android:id="@+id/radio_disturb"
+                    android:layout_width="105dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Do Not Disturb" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_social"
+                    android:layout_width="34dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Social" />
+
+                <RadioButton
+                    android:id="@+id/radio_working"
+                    android:layout_width="49dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Working" />
+
+            </LinearLayout>
+
+        </RadioGroup>
     </com.google.android.material.textfield.TextInputLayout>
+
+
 
     <TableRow
         android:layout_width="match_parent"
