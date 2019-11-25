@@ -102,10 +102,11 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 
     @Override
     public void onBackPressed(){ // When back is pressed, reload to main screen to stop any duplications
-        this.finish();
+//        this.finish();
         Log.d("Back", "back");
         Intent intent = new Intent(this, DrawerActivity.class);
         startActivity(intent);
-        super.onBackPressed();
+        this.finish();
+//        super.onBackPressed();
     }
 }

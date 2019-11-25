@@ -195,7 +195,8 @@ public class HomeFragment extends Fragment {
 
                 } else {
                     inviteNotification.setHeight(0);
-                    ((ViewGroup) line.getParent()).removeView(line);
+                    if(line.getParent() != null)
+                        ((ViewGroup) line.getParent()).removeView(line);
                 }
 
             }
@@ -266,24 +267,25 @@ public class HomeFragment extends Fragment {
 
     private void readInvites(final inviteCallback callback) {
         db.collection("Users").document(mUser.getUid())
-                .collection("Invites").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .collection("Invites")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> inviteTask) {
-                        if (inviteTask.isSuccessful()) {
-                            String groupName, groupID, hostName;
-                            for (QueryDocumentSnapshot doc_invite : inviteTask.getResult()) {
-                                groupName = doc_invite.getString("Group_Name");
-                                groupID = doc_invite.getString("Group_ID");
-                                hostName = doc_invite.getString("Host_Name");
-
-                                mInvites.add(new InviteStructure(groupName, groupID, hostName));
-                                Log.d(TAG, "=DEBUG= Retrieved " + groupName + " & adding to list");
-                            }
-                        } else {
-                            Log.d(TAG, "=DEBUG= Error retrieving invitation docs.");
+                    public void onEvent(@Nullable QuerySnapshot inviteTask,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
                         }
+                        String groupName, groupID, hostName;
+                        mInvites.clear();
+                        for (QueryDocumentSnapshot doc_invite : inviteTask) {
+                            groupName = doc_invite.getString("Group_Name");
+                            groupID = doc_invite.getString("Group_ID");
+                            hostName = doc_invite.getString("Host_Name");
 
+                            mInvites.add(new InviteStructure(groupName, groupID, hostName));
+                            Log.d(TAG, "=DEBUG= Retrieved " + groupName + " & adding to list");
+                        }
                         callback.onCallback(mInvites);
                     }
                 });
