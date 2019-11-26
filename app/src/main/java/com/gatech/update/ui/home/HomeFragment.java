@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -60,8 +61,6 @@ public class HomeFragment extends Fragment {
     private ArrayList<GroupStructure> mGroups;
     // define a list of invite objects
     private ArrayList<InviteStructure> mInvites;
-    // now a list for users in a certain group & their status...
-    private ArrayList<String> mGroupNames, mGroupIDs, mUsers, mStatus;
 
     // create tag for debugging
     private String TAG = "DisplayGroupInfo";
@@ -146,7 +145,6 @@ public class HomeFragment extends Fragment {
                             hashUser.put("Firebase_ID", mUser.getUid());
                             hashUser.put("Permission", "User");
                             hashUser.put("Username", mUser.getEmail());
-                            //TODO: add real-time status addition (would need the oncallback nest)
 
                             // Updates the list of groups you're a part of
                             db.collection("Users").document(mUser.getUid())
@@ -159,16 +157,27 @@ public class HomeFragment extends Fragment {
                                         }
                                     });
 
-                            // Adds your user document to the group
-                            db.collection("Groups").document(invGroupID)
-                                    .collection("Users").document(mUser.getUid())
-                                    .set(hashUser)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.d(TAG, "Added userDoc to group database");
-                                        }
-                                    });
+
+                            // Retrieves status before adding you to the group
+                            readStatus(new stringCallback() {
+                                @Override
+                                public void onCallback(String status, String activity) {
+                                    hashUser.put("Activity", activity);
+                                    hashUser.put("Status", status);
+
+                                    // Adds your user document to the group
+                                    db.collection("Groups").document(invGroupID)
+                                            .collection("Users").document(mUser.getUid())
+                                            .set(hashUser)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "Added userDoc to group database");
+                                                }
+                                            });
+                                }
+                            }, mUser.getUid());
+
 
                             // Delete the invitation
                             deleteInvitation(invGroupID, position);
@@ -275,6 +284,40 @@ public class HomeFragment extends Fragment {
                 });
     }
 
+    /** readStatus() is called with a user's ID and performs a FireStore read for the user's status
+     *      it adds the status to the user structure (if previously set), or adds an empty status
+     *
+     * @param callback - the callback to call once query complete
+     * @param uID - the user's ID (unchanging) for database queries
+     */
+    private void readStatus(final stringCallback callback, final String uID) {
+        db.collection("Users")
+                .document(uID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        String status, activity;
+                        if (task.isSuccessful()) {
+                            status = task.getResult().getString("Status");
+                            activity = task.getResult().getString("Activity");
+                            if (status == null) {
+                                status = "";
+                            }
+                            if (activity == null) {
+                                activity = "";
+                            }
+                        } else {
+                            Log.d(TAG, "=DEBUG= unable to collect status of user");
+                            status = "";
+                            activity ="";
+                        }
+
+                        callback.onCallback(status, activity);
+                    }
+                });
+    }
+
 
     private void readGroupNames(final listCallback callback) {
         db.collection("Users")
@@ -369,6 +412,8 @@ public class HomeFragment extends Fragment {
         void onCallback(ArrayList<String> data_X, ArrayList<String> data_Y, ArrayList<String> data_Z);
     }
 
-
+    public interface stringCallback {
+        void onCallback(String data_X, String data_Y);
+    }
 
 }
