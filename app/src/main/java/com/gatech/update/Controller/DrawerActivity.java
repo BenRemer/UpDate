@@ -1,12 +1,19 @@
 package com.gatech.update.Controller;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -21,6 +28,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
+
 public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -28,6 +37,11 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 //    private FirebaseDatabase database;
 //    private DatabaseReference myRef;
     private FirebaseUser mUser;
+
+    // for image permissions
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
+    Uri imgURI;
+    private ImageView pic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +71,7 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_group, R.id.nav_account, R.id.nav_map,
-                R.id.nav_logout, R.id.nav_share, R.id.nav_send)
+                R.id.nav_logout)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -74,6 +88,26 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         // Set name & email for user
         final TextView name = navHead.findViewById(R.id.text_name_d);
         final TextView email = navHead.findViewById(R.id.text_email_d);
+        pic = navHead.findViewById(R.id.sidebar_pic);
+
+        imgURI = mUser.getPhotoUrl();
+
+        // See if user permissions
+        int permissions = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissions != PackageManager.PERMISSION_GRANTED) {
+            // Create the permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        } else {
+            // We have permissions. read image
+            try {
+                pic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), imgURI));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         name.setText(mUser.getDisplayName());
         email.setText(mUser.getEmail());
     }
@@ -94,6 +128,19 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
 
     public void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+            if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                try {
+                    pic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), imgURI));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 //    @Override

@@ -7,13 +7,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -26,7 +30,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.gatech.update.Controller.CreateGroupActivity;
 import com.gatech.update.Controller.CustomPinActivity;
 import com.gatech.update.Controller.DrawerActivity;
 import com.gatech.update.Controller.LocationService;
@@ -43,14 +46,23 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 public class AccountFragment extends Fragment {
 
     private AccountViewModel accountViewModel;
     private DocumentReference userDoc;
     private static final String TAG = "AccountFragment";
+
+    // Image
+    public static final int PICK_IMAGE = 1;
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
+    Uri imgURI;
+    private ImageView userPic;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Boolean hasFingerprint = false;
@@ -66,13 +78,7 @@ public class AccountFragment extends Fragment {
         accountViewModel =
                 ViewModelProviders.of(this).get(AccountViewModel.class);
         final View root = inflater.inflate(R.layout.fragment_account, container, false);
-//        final TextView textView = root.findViewById(R.id.text_gallery);
-//        accountViewModel.getText().observe(this, new Observer<String>() {
-//            @Override
-//            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
-//            }
-//        });
+
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final TextView status = root.findViewById(R.id.text_status);
@@ -84,6 +90,38 @@ public class AccountFragment extends Fragment {
         final Switch background_switch = root.findViewById(R.id.background_switch);
         Button update = root.findViewById(R.id.update_button);
         Button logout = root.findViewById(R.id.logout_button);
+        userPic = (ImageView)root.findViewById(R.id.account_pic);
+
+        Activity thisActivity = getActivity();
+        imgURI = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+
+        // Handle image (permissions required)
+        int permissions = ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissions != PackageManager.PERMISSION_GRANTED) {
+            // Create the permission
+            ActivityCompat.requestPermissions(thisActivity,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        } else {
+            // We have permissions. read image
+            try {
+                userPic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imgURI));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Set a listener for the picture
+        userPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                // Opens gallery to select image
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+            }
+        });
 
         // Set title
         ((DrawerActivity) getActivity()).setActionBarTitle("Account Information");
@@ -120,7 +158,9 @@ public class AccountFragment extends Fragment {
             @Override
             public void onClick(View v) { // update info
                 UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-                        .setDisplayName(username.getText().toString()).build();
+                        .setDisplayName(username.getText().toString())
+                        .setPhotoUri(imgURI)
+                        .build();
                 user.updateProfile(request)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -287,6 +327,44 @@ public class AccountFragment extends Fragment {
 //        name.setText(user.getDisplayName());
 
         return root;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+                // Grab bitmap
+                imgURI = data.getData();
+                Log.d(TAG, "=DEBUG= Chose image: " + imgURI.toString());
+                Bitmap bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imgURI);
+
+                // set img
+                userPic.setImageBitmap(bmp);
+            }
+
+            if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE && resultCode == RESULT_OK) {
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "Caught IOexception", e);
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+            if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                Log.d(TAG, "=DEBUG= SETTING userpic : " + imgURI.toString());
+                try {
+                    userPic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imgURI));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override

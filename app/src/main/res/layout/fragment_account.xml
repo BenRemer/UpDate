@@ -20,22 +20,49 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <FrameLayout
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.467"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/account_pic"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    app:srcCompat="@mipmap/ic_launcher_round"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"/>
+
+                <ImageView
+                    android:id="@+id/circle_crop"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/profile_crop"/>
+
+            </FrameLayout>
+
+
             <EditText
                 android:id="@+id/name_edittext"
                 android:layout_width="302dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="24dp"
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:text="Name"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@android:color/holo_green_dark"
-                android:textSize="40sp"
+                android:textSize="32sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.467"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
 
             <TextView
                 android:id="@+id/text_status"
@@ -45,7 +72,7 @@
                 android:text="null"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@android:color/holo_green_light"
-                android:textSize="25sp"
+                android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.459"
                 app:layout_constraintStart_toStartOf="parent"
@@ -54,14 +81,14 @@
             <EditText
                 android:id="@+id/email_edittext"
                 android:layout_width="302dp"
-                android:layout_height="70dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:ems="10"
                 android:inputType="textEmailAddress"
                 android:text="email"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@android:color/holo_green_dark"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.458"
                 app:layout_constraintStart_toStartOf="parent"
@@ -211,6 +238,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:text="Logout" />
+
         </LinearLayout>
     </ScrollView>
 
