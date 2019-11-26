@@ -4,19 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.gatech.update.Controller.DeleteActivity;
 import com.gatech.update.Controller.DrawerActivity;
@@ -26,11 +24,8 @@ import com.gatech.update.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -38,8 +33,9 @@ public class GroupFragment extends Fragment {
 
     private LinearLayout.LayoutParams params;
     private LinearLayout ll;
-    private TextView text_Name, text_Status;
+    private TextView text_Name, text_Status, text_Activity;
     private String groupID, groupName;
+    private TableRow tr;
 
     private Button buttonDelete, buttonInvite;
 
@@ -60,6 +56,7 @@ public class GroupFragment extends Fragment {
 
         ArrayList<String> users = group.getUsers();
         ArrayList<String> status = group.getStatus();
+        ArrayList<String> activities = group.getActivity();
         groupName = group.getGroupName();
         groupID = group.getGroupID();
 
@@ -67,6 +64,7 @@ public class GroupFragment extends Fragment {
         ((DrawerActivity) getActivity()).setActionBarTitle(groupName);
 
         ll = root.findViewById(R.id.l_layout);
+
         params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -101,18 +99,34 @@ public class GroupFragment extends Fragment {
             // Create
             text_Name = new TextView(ctx);
             text_Status = new TextView(ctx);
+            text_Activity = new TextView(ctx);
+            tr = new TableRow(ctx);
+
             // Params
             text_Name.setLayoutParams(params);
             text_Name.setTextSize(24);
             text_Name.setTextColor(Color.BLACK);
+
             text_Status.setLayoutParams(params);
             text_Status.setTextSize(18);
+
+            text_Activity.setLayoutParams(params);
+            text_Activity.setTextSize(18);
+
             // Set the text
             text_Name.setText(users.get(i));
             text_Status.setText(status.get(i));
+            text_Activity.setText(activities.get(i));
+
             // Add views
+//            this.tr.addView(text_Name);
+//            this.tr.addView(text_Activity);
             this.ll.addView(text_Name);
+            this.ll.addView(text_Activity);
             this.ll.addView(text_Status);
+
+//            tr.setLayoutParams(params);
+//            tr.setOrientation(LinearLayout.HORIZONTAL);
         }
 //        root.setFocusableInTouchMode(true);
 //        root.requestFocus();

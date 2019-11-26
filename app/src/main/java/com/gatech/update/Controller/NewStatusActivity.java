@@ -1,6 +1,5 @@
 package com.gatech.update.Controller;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -11,7 +10,6 @@ import androidx.annotation.NonNull;
 
 import com.gatech.update.R;
 import com.github.omadahealth.lollipin.lib.PinCompatActivity;
-import com.github.omadahealth.lollipin.lib.managers.AppLock;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -107,6 +105,7 @@ public class NewStatusActivity extends PinCompatActivity implements View.OnClick
         final Map<String, Object> status = new HashMap<>();
         String status_text = input_status.getText().toString();
         status.put("Status", status_text);
+        status.put("Activity", activity);
 
         // Add the user's new status to user's database
         db.collection("Users")

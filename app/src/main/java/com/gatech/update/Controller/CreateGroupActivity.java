@@ -99,8 +99,10 @@ public class CreateGroupActivity extends PinActivity {
              * @param status - the returned status of the user. Empty ("") if read fails or not set.
              */
             @Override
-            public void onCallback(String status) {
-                Log.d(TAG, "=DEBUG= Callback status: " + status);
+            public void onCallback(String status, String activity) {
+                Log.d(TAG, "=DEBUG= Callback status: " + status + " and activity " + activity);
+                user.put("Status", status);
+                user.put("Activity", activity);
 
                 // create document and put group in it
                 db.collection("Groups")
@@ -173,20 +175,23 @@ public class CreateGroupActivity extends PinActivity {
         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                String status;
+                String status, activity;
                 if (task.isSuccessful()) {
-                    mStatus = task.getResult().getString("Status");
-                    if (mStatus != null) {
-                        status = mStatus;
-                    } else {
+                    status = task.getResult().getString("Status");
+                    activity = task.getResult().getString("Activity");
+                    if (status == null) {
                         status = "";
+                    }
+                    if (activity == null) {
+                        activity = "";
                     }
                 } else {
                     Log.d(TAG, "=DEBUG= unable to collect status of user");
                     status = "";
+                    activity ="";
                 }
 
-                callback.onCallback(status);
+                callback.onCallback(status, activity);
             }
         });
     }
@@ -194,6 +199,6 @@ public class CreateGroupActivity extends PinActivity {
     /** Callback's interface - holds the onCallback method to be performed
      */
     public interface stringCallback {
-        void onCallback(String data);
+        void onCallback(String data_X, String data_Y);
     }
 }

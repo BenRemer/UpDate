@@ -196,7 +196,7 @@ public class HomeFragment extends Fragment {
         // 1: Acquire a List of Group Names
         readGroupNames(new listCallback() {
             @Override
-            public void onCallback(ArrayList<String> groupNames, ArrayList<String> groupIDs) {
+            public void onCallback(ArrayList<String> groupNames, ArrayList<String> groupIDs, ArrayList<String> X) {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + groupNames.toString());
                 mGroups.clear();
                 // 2: Acquire a List of User Names (per group)
@@ -206,13 +206,14 @@ public class HomeFragment extends Fragment {
                     final String groupID = groupIDs.get(i);
                     readUserNames(new listCallback() {
                         @Override
-                        public void onCallback(ArrayList<String> uNames, ArrayList<String> uStats) {
+                        public void onCallback(ArrayList<String> uNames, ArrayList<String> uActivities,
+                                               ArrayList<String> uStats) {
                             Log.d(TAG, "=DEBUG= Callback from User Names");
 
                             // Add to structure
-                            Log.d(TAG, "=DEBUG= Group["+groupName+"]: has usernames["+uNames+"] & statuses["+uStats+"].");
+                            Log.d(TAG, "=DEBUG= Group["+groupName+"]: has usernames["+uNames+"] & statuses["+uStats+"] & activities["+uActivities+"].");
 
-                            mGroups.add(new GroupStructure(groupName, groupID, uNames, uStats));
+                            mGroups.add(new GroupStructure(groupName, groupID, uNames, uStats, uActivities));
                             // this line increases performance & doesn't change size on num of items
                             mRVGroup.setHasFixedSize(true);
                             mAdapterGroup = new GroupAdapter(mGroups);
@@ -295,7 +296,7 @@ public class HomeFragment extends Fragment {
                             gName.add(doc_group.getString("Group_Name"));
                             gID.add(doc_group.getString("Group_ID"));
                         }
-                        callback.onCallback(gName, gID);
+                        callback.onCallback(gName, gID, null);
                     }
                 });
     }
@@ -310,12 +311,14 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> userTask) {
                         ArrayList<String> usernames = new ArrayList<>();
+                        ArrayList<String> activities = new ArrayList<>();
                         ArrayList<String> statuses = new ArrayList<>();
                         if (userTask.isSuccessful()) {
-                            String user, status;
+                            String user, activity, status;
                             for (QueryDocumentSnapshot doc_user : userTask.getResult()) {
                                 // we now have each of the users' names & status
                                 user = doc_user.getString("Display_Name");
+                                activity = doc_user.getString("Activity");
                                 status = doc_user.getString("Status");
 
                                 // Add to respective lists
@@ -325,13 +328,20 @@ public class HomeFragment extends Fragment {
                                 } else {
                                     statuses.add("");
                                 }
+
+                                if (activity != null) {
+                                    activities.add(activity);
+                                } else {
+                                    activities.add("");
+                                }
+
 //                                Log.d(TAG, "=DEBUG= \t\tFound user [" + user + "] : " + status);
                             }
 //                            Log.d(TAG, "=DEBUG= \tSuccess: Retrieved users.");
                         } else {
                             Log.d(TAG, "=DEBUG= \tError retrieving user docs");
                         }
-                        callback.onCallback(usernames, statuses);
+                        callback.onCallback(usernames, activities, statuses);
                     }
                 });
     }
@@ -356,7 +366,7 @@ public class HomeFragment extends Fragment {
     }
 
     public interface listCallback {
-        void onCallback(ArrayList<String> data_X, ArrayList<String> data_Y);
+        void onCallback(ArrayList<String> data_X, ArrayList<String> data_Y, ArrayList<String> data_Z);
     }
 
 
