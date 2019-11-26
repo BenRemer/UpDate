@@ -65,6 +65,7 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         View navHead = navigationView.getHeaderView(0);
 
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//        if(lockManager.getAppLock() != null)
         lockManager.getAppLock().setOnlyBackgroundTimeout(true);
 
         // Passing each menu ID as a set of Ids because each
@@ -93,20 +94,20 @@ public class DrawerActivity extends PinCompatActivity { //AppCompatActivity
         imgURI = mUser.getPhotoUrl();
 
         // See if user permissions
-        int permissions = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissions != PackageManager.PERMISSION_GRANTED) {
-            // Create the permission
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-        } else {
-            // We have permissions. read image
-            try {
-                pic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), imgURI));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        int permissions = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+//        if (permissions != PackageManager.PERMISSION_GRANTED) {
+//            // Create the permission
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+//                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+//        } else {
+//            // We have permissions. read image
+//            try {
+//                pic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), imgURI));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         name.setText(mUser.getDisplayName());
         email.setText(mUser.getEmail());

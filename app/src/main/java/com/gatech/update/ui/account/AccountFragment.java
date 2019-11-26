@@ -131,6 +131,7 @@ public class AccountFragment extends Fragment {
         if(lockManager.getAppLock() != null)
             lockManager.getAppLock().enable();
 
+        // For background
         final SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
         SharedPreferences.Editor ed;
         if(!prefs.contains("background")){
@@ -149,7 +150,6 @@ public class AccountFragment extends Fragment {
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, times);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         timeout_spinner.setAdapter(dataAdapter);
-
 
         // Get username and email and update them
         username.setText(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
@@ -199,17 +199,6 @@ public class AccountFragment extends Fragment {
                         break;
                 }
                 Toast.makeText(getContext(), "Account Updated", Toast.LENGTH_LONG).show();
-//                timeout = timeout * 10000 * 60;
-//                if(timeout == 0){
-//                    Toast.makeText(getContext(), "Must be at least 1", Toast.LENGTH_LONG).show();
-//                    int time =(int) lockManager.getAppLock().getTimeout()/1000/60;
-//                    timeout_input.setText(Integer.toString(time));
-//                    timeout_input.setSelection(timeout_input.getText().length());
-//                } else {
-//                    lockManager.getAppLock().enable();
-////                    lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-//                    lockManager.getAppLock().setTimeout(timeout);
-//                }
             }
         });
 
@@ -229,8 +218,6 @@ public class AccountFragment extends Fragment {
                     lockManager.getAppLock().setTimeout(TIME_IMMEDIATE);
                     timeout_spinner.setSelection(0);
                 } else { // If off ask for pin before turning off
-//                    lockManager.getAppLock().setPasscode(null);
-//                    lockManager.disableAppLock();
                     Intent intent = new Intent(getContext(), CustomPinActivity.class);
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
                     startActivity(intent);
@@ -379,7 +366,7 @@ public class AccountFragment extends Fragment {
         LinearLayout timeout_layout = getView().findViewById(R.id.timeout_layout);
         final SharedPreferences prefs = getActivity().getSharedPreferences("Prefs", 0);
         SharedPreferences.Editor ed;
-        if(!prefs.contains("background")){
+        if(!prefs.contains("background")){  // If background has never been set, set to true
             ed = prefs.edit();
             ed.putBoolean("background", true);
             ed.commit();
@@ -389,10 +376,8 @@ public class AccountFragment extends Fragment {
         }else{
             background_switch.setChecked(false);
         }
-        if(LockManager.getInstance().getAppLock().isPasscodeSet()) {
+        if(LockManager.getInstance().getAppLock().isPasscodeSet()) { // If passcode is set
             pin_switch.setChecked(true);
-//            timeout_text.setVisibility(View.VISIBLE);
-//            timeout_input.setVisibility(View.VISIBLE);
             timeout_layout.setVisibility(View.VISIBLE);
             long time = lockManager.getAppLock().getTimeout();
             if(time == TIME_IMMEDIATE)
@@ -405,11 +390,7 @@ public class AccountFragment extends Fragment {
                 timeout_input.setSelection(3);
             else
                 timeout_input.setSelection(4);
-//            timeout_input.setText(time.toString());
-//            timeout_input.setText((int)lockManager.getAppLock().getTimeout());
         } else {
-//            timeout_text.setVisibility(View.GONE);
-//            timeout_input.setVisibility(View.GONE);
             timeout_layout.setVisibility(View.GONE);
         }
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
