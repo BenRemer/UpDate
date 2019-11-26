@@ -48,7 +48,7 @@ public class NewStatusActivity extends PinCompatActivity implements View.OnClick
         // Obtain information about current user
         mUser = FirebaseAuth.getInstance().getCurrentUser();
         userID = mUser.getUid();
-        
+
         groupIDs = new ArrayList<>();
 
         // Find radio Buttons

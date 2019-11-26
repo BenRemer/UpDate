@@ -71,7 +71,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        // Set title to reflect groupname
+        // Set title to Map
         ((DrawerActivity) getActivity()).setActionBarTitle("Map");
 
         mMapView = root.findViewById(R.id.mapView);
@@ -136,7 +136,7 @@ public class MapFragment extends Fragment {
                             String full_location = latitude + ',' + longitude;
                             Map<String, Object> Location = new HashMap<>();
                             Location.put("Location", full_location);
-                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+//                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
                             final String userID = user.getUid();
                             db.collection("Users")
                                     .document(userID)
@@ -177,21 +177,7 @@ public class MapFragment extends Fragment {
                 getContext().startService(background_service);
             }
         }
-
-//        // Sets GT as a marker
-//        mMapView.getMapAsync(new OnMapReadyCallback() {
-//            @Override
-//            public void onMapReady(GoogleMap mMap) {
-//                googleMap = mMap;
-//                // For dropping a marker at a point on the Map
-//                LatLng GT = new LatLng(33.7728837, -84.393816);
-////                Location myLocation = googleMap.getMyLocation();
-//                googleMap.addMarker(new MarkerOptions().position(GT).title("Georgia Tech").snippet("Marker Description"));
-//            }
-//        });
-
         updateMap();
-
         return root;
     }
 
@@ -300,7 +286,6 @@ public class MapFragment extends Fragment {
                 Log.d(TAG, "=DEBUG= Callback Groups: " + gName.toString());
                 // 2: Acquire a List of User Names (per group)
                 for (int i = 0; i < gName.size(); i++) { // for each group
-
                     readUserData(new multiListCallback() { // Get's all other uses in all groups you're in
                         @Override
                         public void onCallback(final ArrayList<String> uName, ArrayList<String> uID, final ArrayList<String> uStat) {
@@ -329,11 +314,9 @@ public class MapFragment extends Fragment {
                                         }
                                     }
                                 }, uID.get(i));
-
                             }
                         }
                     }, gID.get(i));
-
                 }
             }
         });
@@ -342,7 +325,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mMapView.onResume();
+//        mMapView.onResume();
         updateMap();
     }
 
