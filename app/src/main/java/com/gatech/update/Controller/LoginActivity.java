@@ -170,15 +170,15 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null){
-            Intent intent = new Intent(this, DrawerActivity.class);
-            startActivity(intent);
-            Log.d(TAG, "Logged in");
-        } else {
-            Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Not logged in");
-        }
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        if (user != null){
+//            Intent intent = new Intent(this, DrawerActivity.class);
+//            startActivity(intent);
+//            Log.d(TAG, "Logged in");
+//        } else {
+//            Toast.makeText(getApplicationContext(), "Not logged In", Toast.LENGTH_SHORT).show();
+//            Log.d(TAG, "Not logged in");
+//        }
     }
 
     @Override

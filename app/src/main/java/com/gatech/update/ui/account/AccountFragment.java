@@ -96,20 +96,20 @@ public class AccountFragment extends Fragment {
         imgURI = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
 
         // Handle image (permissions required)
-        int permissions = ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissions != PackageManager.PERMISSION_GRANTED) {
-            // Create the permission
-            ActivityCompat.requestPermissions(thisActivity,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-        } else {
-            // We have permissions. read image
-            try {
-                userPic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imgURI));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        int permissions = ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.READ_EXTERNAL_STORAGE);
+//        if (permissions != PackageManager.PERMISSION_GRANTED) {
+//            // Create the permission
+//            ActivityCompat.requestPermissions(thisActivity,
+//                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+//                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+//        } else {
+//            // We have permissions. read image
+//            try {
+//                userPic.setImageBitmap(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imgURI));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         // Set a listener for the picture
         userPic.setOnClickListener(new View.OnClickListener() {
