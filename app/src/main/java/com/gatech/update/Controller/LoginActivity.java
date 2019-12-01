@@ -69,11 +69,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
-        Button launchAuthentication = findViewById(R.id.launchAuthentication);
 
         // Button listeners
         signInButton.setOnClickListener(this);
-        launchAuthentication.setOnClickListener(this);
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -121,8 +119,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_LONG).show();
-//                            Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
-//                            startActivity(intent);
+                            Intent intent = new Intent(getApplicationContext(), DrawerActivity.class);
+                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -188,10 +186,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             googleSignIn();
 //        } else if (i == R.id.disconnectButton) {
 //            revokeAccess();
-        } else if(i == R.id.launchAuthentication){
-            Intent intent = new Intent(this, CustomPinActivity.class);
-            intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
-            startActivityForResult(intent, 11);
         }
     }
 }
