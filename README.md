@@ -10,13 +10,13 @@ What if there was a way to track your habits and communicate your desires autono
 
 ## Security is Extremely Important to us
 
-UpDate requires a user authentication, with future goals of enabling a 2FA (Two-Factor Authentication) to keep you and your group's information secure.
+UpDate utilized Firebase for Google Authentication and emulates a Pin/Fingerprint 2-Factor authentication if the user chooses for extra security.
 
-You cannot join a group unless first invited with your userID/code.
+You cannot join a group unless first invited via your email.
 
 Most importantly, each user is able to set their personal security information:
  - Don't want your GPS location visible?  Disable GPS Tracking in-app
- - Don't want the app tracking phone-use? Disable background usage
+ - Don't want the app tracking phone-use? Disable background usage (future goal)
 
 ## Features
 
