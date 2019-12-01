@@ -33,7 +33,7 @@ Most importantly, each user is able to set their personal security information:
 ## Installation & Demo Instructions
 
 Basic:
- 1. Install the APK for the UpDate application (UpDate.APK), or alternatively, download the repository and emulate in Android Studio.
+ 1. Install the APK for the UpDate application (UpDate.apk), or alternatively, download the repository and emulate in Android Studio.
  2. Upon first opening the app, you will be prompted with a google authentication log in. Log in with an existing google account to proceed.
  3. Tap the create group button and give it any name (max limit 25 chars) and tap "Create". Your group will automatically be added to the home fragment.
  4. Tap on the newly created group to view the content - you will notice it only has your name as your status & activity are not set.
